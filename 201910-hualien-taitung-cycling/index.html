@@ -169,7 +169,14 @@
                                 <!-- Content -->
                                 <div>
                                     <div class="flex items-baseline justify-between">
-                                        <h3 class="font-bold text-gray-800">{{ stop.location }}</h3>
+                                        <div class="flex items-center gap-2">
+                                            <h3 class="font-bold text-gray-800">{{ stop.location }}</h3>
+                                            <a v-if="stop.mapUrl" :href="stop.mapUrl" target="_blank"
+                                                rel="noopener noreferrer"
+                                                class="text-blue-500 hover:text-blue-700 transition-colors">
+                                                <i class="ph ph-map-pin-line text-lg"></i>
+                                            </a>
+                                        </div>
                                         <span
                                             class="text-xs font-mono text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">{{
                                             stop.time }}</span>
@@ -349,9 +356,9 @@
                         image: 'assets/images/bike01.webp',
                         stay: { name: '海王子', phone: '0927-776008' },
                         stops: [
-                            { time: '14:00', location: '阿勝單車', km: '0 km', type: 'start', note: '集合前要先吃飽飯，集合時繳交 $3900' },
-                            { time: '15:40', location: '都蘭海角咖啡', km: '25 km', type: 'stop', note: '駐足 1H，好好發呆' },
-                            { time: '17:40', location: '東河 民宿', km: '40 km', type: 'end', note: '' }
+                            { time: '14:00', location: '阿勝單車', km: '0 km', type: 'start', note: '集合前要先吃飽飯,集合時繳交 $3900', mapUrl: 'https://www.google.com/maps/search/?api=1&query=阿勝單車+台東' },
+                            { time: '15:40', location: '都蘭海角咖啡', km: '25 km', type: 'stop', note: '駐足 1H,好好發呆', mapUrl: 'https://www.google.com/maps/search/?api=1&query=都蘭海角咖啡' },
+                            { time: '17:40', location: '東河 民宿', km: '40 km', type: 'end', note: '', mapUrl: 'https://www.google.com/maps/search/?api=1&query=東河+台東' }
                         ]
                     },
                     {
@@ -362,11 +369,11 @@
                         image: 'assets/images/bike02.webp',
                         stay: { name: '浪幸福來', phone: '0988-163383' },
                         stops: [
-                            { time: '09:00', location: '出發', km: '0 km', type: 'start', note: '自選：東河海灘日出' },
-                            { time: '09:30', location: '都歷海灘', km: '7 km', type: 'stop', note: '' },
-                            { time: '10:00', location: '八嗡嗡自行車道', km: '14 km', type: 'stop', note: '' },
-                            { time: '11:30', location: '三仙台 / 比西里岸', km: '24 km', type: 'stop', note: '駐足 2.5H，好好發呆 + 午餐到 14:00' },
-                            { time: '16:30', location: '長濱', km: '52 km', type: 'end', note: '' }
+                            { time: '09:00', location: '出發', km: '0 km', type: 'start', note: '自選:東河海灘日出', mapUrl: 'https://www.google.com/maps/search/?api=1&query=東河海灘+台東' },
+                            { time: '09:30', location: '都歷海灘', km: '7 km', type: 'stop', note: '', mapUrl: 'https://www.google.com/maps/search/?api=1&query=都歷海灘+台東' },
+                            { time: '10:00', location: '八嗡嗡自行車道', km: '14 km', type: 'stop', note: '', mapUrl: 'https://www.google.com/maps/search/?api=1&query=八嗡嗡自行車道+台東' },
+                            { time: '11:30', location: '三仙台 / 比西里岸', km: '24 km', type: 'stop', note: '駐足 2.5H,好好發呆 + 午餐到 14:00', mapUrl: 'https://www.google.com/maps/search/?api=1&query=三仙台+台東' },
+                            { time: '16:30', location: '長濱', km: '52 km', type: 'end', note: '', mapUrl: 'https://www.google.com/maps/search/?api=1&query=長濱+台東' }
                         ]
                     },
                     {
@@ -377,12 +384,12 @@
                         image: 'assets/images/bike03.webp',
                         stay: { name: '12號橋空間', phone: '0912-225810' },
                         stops: [
-                            { time: '09:00', location: '出發', km: '0 km', type: 'start', note: '自選：金剛大道日出' },
-                            { time: '10:00', location: '北迴歸線 / 靜浦部落', km: '15 km', type: 'stop', note: '' },
-                            { time: '11:30', location: '小七 / 海鮮餐廳', km: '33 km', type: 'stop', note: '休息到 13:30' },
-                            { time: '14:30', location: '新社梯田', km: '41 km', type: 'stop', note: '' },
-                            { time: '15:00', location: '親不知子斷崖 / 大鼻山步道', km: '46 km', type: 'stop', note: '駐足 1H，好好發呆' },
-                            { time: '18:00', location: '豐濱', km: '65 km', type: 'end', note: '' }
+                            { time: '09:00', location: '出發', km: '0 km', type: 'start', note: '自選：金剛大道日出', mapUrl: 'https://www.google.com/maps/search/?api=1&query=金剛大道+台東' },
+                            { time: '10:00', location: '北迴歸線 / 靜浦部落', km: '15 km', type: 'stop', note: '', mapUrl: 'https://www.google.com/maps/search/?api=1&query=北迴歸線+靜浦部落+花蓮' },
+                            { time: '11:30', location: '小七 / 海鮮餐廳', km: '33 km', type: 'stop', note: '休息到 13:30', mapUrl: 'https://www.google.com/maps/search/?api=1&query=花蓮豐濱+7-11' },
+                            { time: '14:30', location: '新社梯田', km: '41 km', type: 'stop', note: '', mapUrl: 'https://www.google.com/maps/search/?api=1&query=新社梯田+花蓮' },
+                            { time: '15:00', location: '親不知子斷崖 / 大鼻山步道', km: '46 km', type: 'stop', note: '駐足 1H，好好發呆', mapUrl: 'https://www.google.com/maps/search/?api=1&query=親不知子斷崖+花蓮' },
+                            { time: '18:00', location: '豐濱', km: '65 km', type: 'end', note: '', mapUrl: 'https://www.google.com/maps/search/?api=1&query=豐濱+花蓮' }
                         ]
                     },
                     {
@@ -393,9 +400,9 @@
                         image: 'assets/images/bike04.webp',
                         stay: null,
                         stops: [
-                            { time: '10:00', location: '出發', km: '0 km', type: 'start', note: '' },
-                            { time: '11:30', location: '花蓮', km: '21 km', type: 'stop', note: '' },
-                            { time: '14:00', location: '還車', km: '', type: 'end', note: '' },
+                            { time: '10:00', location: '出發', km: '0 km', type: 'start', note: '', mapUrl: 'https://www.google.com/maps/search/?api=1&query=豐濱+花蓮' },
+                            { time: '11:30', location: '花蓮', km: '21 km', type: 'stop', note: '', mapUrl: 'https://www.google.com/maps/search/?api=1&query=花蓮車站' },
+                            { time: '14:00', location: '還車', km: '', type: 'end', note: '', mapUrl: 'https://www.google.com/maps/search/?api=1&query=花蓮車站' },
                             { time: '14:30', location: '下次再見', km: '', type: 'info', note: '' }
                         ]
                     }
