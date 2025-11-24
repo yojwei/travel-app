@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>立秋北行 - 2019 單車之旅</title>
+
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        /* Hide scrollbar for clean horizontal scroll */
+        .hide-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scroll {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .fade-enter-active,
+        .fade-leave-active {
+            transition: opacity 0.3s ease;
+        }
+
+        .fade-enter-from,
+        .fade-leave-to {
+            opacity: 0;
+        }
+
+        /* Image zoom modal */
+        .image-modal {
+            backdrop-filter: blur(8px);
+        }
+
+        .zoom-image {
+            max-height: 90vh;
+            max-width: 90vw;
+            object-fit: contain;
+        }
+    </style>
+</head>
+
+<body class="text-gray-800 antialiased">
+
+    <div id="app" class="max-w-md mx-auto bg-white min-h-screen shadow-2xl relative flex flex-col">
+
+        <!-- Header / Hero Section -->
+        <header class="relative h-64 overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+                alt="台東花蓮海岸公路" class="absolute w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 p-6 text-white">
+                <div class="flex items-center space-x-2 mb-2 text-orange-300">
+                    <i class="ph ph-bicycle text-xl"></i>
+                    <span class="text-sm tracking-widest uppercase font-semibold">台東 ➞ 花蓮</span>
+                </div>
+                <h1 class="text-3xl font-bold mb-1">立秋北行</h1>
+                <p class="text-gray-300 text-sm opacity-90">2019.10.10 - 10.14</p>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur shadow-sm border-b border-gray-100">
+            <div class="flex justify-around">
+                <button v-for="tab in tabs" :key="tab.id" @click="currentTab = tab.id"
+                    class="flex-1 py-4 text-sm font-medium transition-colors duration-200 relative"
+                    :class="currentTab === tab.id ? 'text-orange-600' : 'text-gray-500 hover:text-gray-700'">
+                    <div class="flex flex-col items-center gap-1">
+                        <i :class="['ph', tab.icon, 'text-xl']"></i>
+                        <span>{{ tab.name }}</span>
+                    </div>
+                    <span v-if="currentTab === tab.id"
+                        class="absolute bottom-0 left-0 w-full h-0.5 bg-orange-600"></span>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto bg-gray-50 p-4 pb-24">
+
+            <!-- Tab: 行程 (Itinerary) -->
+            <transition name="fade" mode="out-in">
+                <div v-if="currentTab === 'itinerary'" key="itinerary">
+
+                    <!-- Day Selector -->
+                    <div class="flex space-x-3 overflow-x-auto hide-scroll mb-6 pb-2">
+                        <button v-for="(day, index) in itinerary" :key="index" @click="activeDayIndex = index"
+                            class="flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all shadow-sm border"
+                            :class="activeDayIndex === index ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'">
+                            Day {{ index + 1 }}
+                        </button>
+                    </div>
+
+                    <!-- Active Day Detail -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-end mb-6 border-b border-gray-100 pb-4">
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-800">Day {{ activeDayIndex + 1 }}</h2>
+                                <p class="text-gray-500 text-sm mt-1">{{ currentDay.date }}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="block text-2xl font-bold text-orange-600">{{ currentDay.distance }}</span>
+                                <span class="text-xs text-gray-400 uppercase">總公里數</span>
+                            </div>
+                        </div>
+
+                        <!-- Photo Gallery -->
+                        <div v-if="currentDay.image"
+                            class="mb-6 -mx-5 overflow-hidden rounded-xl cursor-pointer hover:opacity-90 transition-opacity"
+                            @click="openImageModal(currentDay.image)">
+                            <img :src="currentDay.image" :alt="'Day ' + (activeDayIndex + 1) + ' 風景'"
+                                class="w-full h-auto object-contain" loading="lazy">
+                        </div>
+
+                        <!-- Route Header -->
+                        <div class="flex items-center justify-between bg-orange-50 p-3 rounded-lg mb-6">
+                            <span class="font-bold text-gray-700">{{ currentDay.start }}</span>
+                            <i class="ph ph-arrow-right text-orange-400"></i>
+                            <span class="font-bold text-gray-700">{{ currentDay.end }}</span>
+                        </div>
+
+                        <!-- Timeline -->
+                        <div
+                            class="relative pl-4 space-y-8 before:absolute before:left-1.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-200">
+
+                            <div v-for="(stop, sIndex) in currentDay.stops" :key="sIndex" class="relative pl-6">
+                                <!-- Dot -->
+                                <div class="absolute left-0 top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white shadow-sm z-10"
+                                    :class="getStopTypeColor(stop.type)">
+                                </div>
+
+                                <!-- Content -->
+                                <div>
+                                    <div class="flex items-baseline justify-between">
+                                        <h3 class="font-bold text-gray-800">{{ stop.location }}</h3>
+                                        <span
+                                            class="text-xs font-mono text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">{{
+                                            stop.time }}</span>
+                                    </div>
+                                    <div v-if="stop.km" class="text-xs text-orange-500 font-medium mt-0.5 mb-1">
+                                        <i class="ph ph-map-pin mr-1"></i>{{ stop.km }}
+                                    </div>
+                                    <p v-if="stop.note"
+                                        class="text-sm text-gray-600 mt-1 bg-gray-50 p-2 rounded border border-gray-100">
+                                        {{ stop.note }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Accommodation Card -->
+                        <div v-if="currentDay.stay" class="mt-8 pt-6 border-t border-gray-100">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">住宿資訊</h4>
+                            <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                                <div class="flex items-start gap-3">
+                                    <div class="bg-blue-100 p-2 rounded-lg text-blue-600">
+                                        <i class="ph ph-house-line text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-gray-800">{{ currentDay.stay.name }}</h3>
+                                        <a :href="'tel:' + currentDay.stay.phone"
+                                            class="text-sm text-blue-600 hover:underline mt-1 block flex items-center">
+                                            <i class="ph ph-phone mr-1"></i> {{ currentDay.stay.phone }}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </transition>
+
+            <!-- Tab: 清單 (Packing) -->
+            <transition name="fade" mode="out-in">
+                <div v-if="currentTab === 'packing'" key="packing">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-4">
+                        <div class="bg-yellow-50 p-4 border-b border-yellow-100">
+                            <h2 class="font-bold text-yellow-800 flex items-center">
+                                <i class="ph ph-warning-circle mr-2 text-xl"></i>
+                                租車提供配件
+                            </h2>
+                            <p class="text-sm text-yellow-700 mt-2 leading-relaxed">
+                                安全帽、車鎖、碼錶、水壺架、前後燈、馬鞍袋、內胎、打氣筒。
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div v-for="(category, cIndex) in packingList" :key="cIndex"
+                            class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+                            <h3 class="font-bold text-gray-800 mb-3 flex items-center">
+                                <i :class="['ph', category.icon, 'mr-2 text-lg', category.color]"></i>
+                                {{ category.title }}
+                            </h3>
+                            <div class="space-y-2">
+                                <div v-for="(item, iIndex) in category.items" :key="iIndex"
+                                    @click="toggleItem(cIndex, iIndex)"
+                                    class="flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors"
+                                    :class="item.checked ? 'bg-green-50' : 'bg-gray-50 hover:bg-gray-100'">
+                                    <span :class="item.checked ? 'text-gray-500 line-through' : 'text-gray-700'">{{
+                                        item.name }}</span>
+                                    <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors"
+                                        :class="item.checked ? 'bg-green-500 border-green-500' : 'border-gray-300'">
+                                        <i v-if="item.checked" class="ph ph-check text-white text-sm"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </transition>
+
+            <!-- Tab: 資訊 (Info/Team) -->
+            <transition name="fade" mode="out-in">
+                <div v-if="currentTab === 'info'" key="info">
+
+                    <!-- Tips Section -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-4">
+                        <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="ph ph-coat-hanger mr-2 text-orange-500"></i>
+                            穿著與打包
+                        </h2>
+
+                        <div class="mb-4">
+                            <h3 class="text-sm font-semibold text-gray-600 mb-2">穿著方式</h3>
+                            <ul class="text-sm space-y-2 text-gray-600">
+                                <li class="flex items-start"><i
+                                        class="ph ph-dot-outline mt-0.5 mr-1 text-orange-400"></i> 臉部：小帽遮陽 + 頭巾遮臉防曬</li>
+                                <li class="flex items-start"><i
+                                        class="ph ph-dot-outline mt-0.5 mr-1 text-orange-400"></i> 上身：排汗衣物</li>
+                                <li class="flex items-start"><i
+                                        class="ph ph-dot-outline mt-0.5 mr-1 text-orange-400"></i> 手臂：袖套防曬</li>
+                                <li class="flex items-start"><i
+                                        class="ph ph-dot-outline mt-0.5 mr-1 text-orange-400"></i> 手掌：手套防摩擦</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-orange-50 p-3 rounded-lg">
+                            <h3 class="text-sm font-semibold text-orange-800 mb-1">打包技巧</h3>
+                            <p class="text-sm text-orange-700 leading-relaxed">
+                                單車提供馬鞍袋 x2。衣物請依天份用塑膠袋打包，好預防下雨。若有背包可用彈力繩固定於車架上，但務必先用塑膠袋包好！
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Team Section -->
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                        <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="ph ph-users mr-2 text-blue-500"></i>
+                            不落的旅人們
+                        </h2>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div v-for="member in team" :key="member" class="bg-gray-50 rounded-lg p-2 text-center">
+                                <!-- Updated Avatar using API -->
+                                <div class="w-12 h-12 mx-auto mb-2 relative">
+                                    <img :src="`https://api.dicebear.com/7.x/adventurer/svg?seed=${member}&backgroundColor=b6e3f4,c0aede,d1d4f9`"
+                                        :alt="member"
+                                        class="w-full h-full rounded-full object-cover bg-gray-100 shadow-sm"
+                                        loading="lazy">
+                                </div>
+                                <span class="text-sm font-medium text-gray-700 block truncate">{{ member }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 text-center">
+                        <p class="text-xs text-gray-400">Have a nice trip!</p>
+                        <i class="ph ph-bicycle text-3xl text-gray-300 mt-2"></i>
+                    </div>
+                </div>
+            </transition>
+
+        </main>
+
+        <!-- Image Modal -->
+        <transition name="fade">
+            <div v-if="showImageModal" @click="closeImageModal"
+                class="image-modal fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4">
+                <button @click="closeImageModal"
+                    class="absolute top-4 right-4 text-white bg-black/50 hover:bg-black/70 rounded-full p-2 transition-colors z-10">
+                    <i class="ph ph-x text-2xl"></i>
+                </button>
+                <img :src="modalImageSrc" alt="放大圖片" class="zoom-image rounded-lg shadow-2xl" @click.stop>
+            </div>
+        </transition>
+    </div>
+
+    <script>
+        const { createApp, ref, computed } = Vue;
+
+        createApp({
+            setup() {
+                const currentTab = ref('itinerary');
+                const activeDayIndex = ref(0);
+                const showImageModal = ref(false);
+                const modalImageSrc = ref('');
+
+                const tabs = [
+                    { id: 'itinerary', name: '行程', icon: 'ph-map-trifold' },
+                    { id: 'packing', name: '清單', icon: 'ph-suitcase' },
+                    { id: 'info', name: '資訊', icon: 'ph-info' }
+                ];
+
+                // Data from PDF
+                const itinerary = [
+                    {
+                        date: '2019.10.10',
+                        start: '台東',
+                        end: '東河',
+                        distance: '40 km',
+                        image: 'assets/images/bike01.webp',
+                        stay: { name: '海王子', phone: '0927-776008' },
+                        stops: [
+                            { time: '14:00', location: '阿勝單車', km: '0 km', type: 'start', note: '集合前要先吃飽飯，集合時繳交 $3900' },
+                            { time: '15:40', location: '都蘭海角咖啡', km: '25 km', type: 'stop', note: '駐足 1H，好好發呆' },
+                            { time: '17:40', location: '東河 民宿', km: '40 km', type: 'end', note: '' }
+                        ]
+                    },
+                    {
+                        date: '2019.10.11',
+                        start: '東河',
+                        end: '長濱',
+                        distance: '52 km',
+                        image: 'assets/images/bike02.webp',
+                        stay: { name: '浪幸福來', phone: '0988-163383' },
+                        stops: [
+                            { time: '09:00', location: '出發', km: '0 km', type: 'start', note: '自選：東河海灘日出' },
+                            { time: '09:30', location: '都歷海灘', km: '7 km', type: 'stop', note: '' },
+                            { time: '10:00', location: '八嗡嗡自行車道', km: '14 km', type: 'stop', note: '' },
+                            { time: '11:30', location: '三仙台 / 比西里岸', km: '24 km', type: 'stop', note: '駐足 2.5H，好好發呆 + 午餐到 14:00' },
+                            { time: '16:30', location: '長濱', km: '52 km', type: 'end', note: '' }
+                        ]
+                    },
+                    {
+                        date: '2019.10.12',
+                        start: '長濱',
+                        end: '豐濱',
+                        distance: '65 km',
+                        image: 'assets/images/bike03.webp',
+                        stay: { name: '12號橋空間', phone: '0912-225810' },
+                        stops: [
+                            { time: '09:00', location: '出發', km: '0 km', type: 'start', note: '自選：金剛大道日出' },
+                            { time: '10:00', location: '北迴歸線 / 靜浦部落', km: '15 km', type: 'stop', note: '' },
+                            { time: '11:30', location: '小七 / 海鮮餐廳', km: '33 km', type: 'stop', note: '休息到 13:30' },
+                            { time: '14:30', location: '新社梯田', km: '41 km', type: 'stop', note: '' },
+                            { time: '15:00', location: '親不知子斷崖 / 大鼻山步道', km: '46 km', type: 'stop', note: '駐足 1H，好好發呆' },
+                            { time: '18:00', location: '豐濱', km: '65 km', type: 'end', note: '' }
+                        ]
+                    },
+                    {
+                        date: '2019.10.13',
+                        start: '豐濱',
+                        end: '花蓮',
+                        distance: '21 km',
+                        image: 'assets/images/bike04.webp',
+                        stay: null,
+                        stops: [
+                            { time: '10:00', location: '出發', km: '0 km', type: 'start', note: '' },
+                            { time: '11:30', location: '花蓮', km: '21 km', type: 'stop', note: '' },
+                            { time: '14:00', location: '還車', km: '', type: 'end', note: '' },
+                            { time: '14:30', location: '下次再見', km: '', type: 'info', note: '' }
+                        ]
+                    }
+                ];
+
+                const packingList = ref([
+                    {
+                        title: '一定要帶',
+                        icon: 'ph-star',
+                        color: 'text-red-500',
+                        items: [
+                            { name: '盥洗衣物 (穿1帶2)', checked: false },
+                            { name: '牙刷、毛巾、個人衛生用品', checked: false },
+                            { name: '行動電源、手機充電器', checked: false },
+                            { name: '兩截式雨衣(上衣) or 輕便雨衣', checked: false },
+                            { name: '證件 (健保卡)', checked: false },
+                            { name: '水壺', checked: false }
+                        ]
+                    },
+                    {
+                        title: '單車用品 (非常建議)',
+                        icon: 'ph-bicycle',
+                        color: 'text-blue-500',
+                        items: [
+                            { name: '車褲', checked: false },
+                            { name: '頭巾', checked: false },
+                            { name: '手套', checked: false },
+                            { name: '小帽', checked: false }
+                        ]
+                    },
+                    {
+                        title: '可能要帶',
+                        icon: 'ph-question',
+                        color: 'text-gray-500',
+                        items: [
+                            { name: '騎乘小背包', checked: false },
+                            { name: '防曬用品', checked: false },
+                            { name: '拖鞋', checked: false },
+                            { name: '塑膠袋數個', checked: false },
+                            { name: '雨傘', checked: false }
+                        ]
+                    }
+                ]);
+
+                const team = [
+                    '郭佳', '君瑜', '楊欣', '君潔', '小K',
+                    '胖胖', '小豪', '阿航', '皓', '大昌'
+                ];
+
+                const currentDay = computed(() => itinerary[activeDayIndex.value]);
+
+                const toggleItem = (catIndex, itemIndex) => {
+                    packingList.value[catIndex].items[itemIndex].checked = !packingList.value[catIndex].items[itemIndex].checked;
+                };
+
+                const getStopTypeColor = (type) => {
+                    switch (type) {
+                        case 'start': return 'bg-green-500';
+                        case 'end': return 'bg-red-500';
+                        case 'info': return 'bg-gray-400';
+                        default: return 'bg-orange-400';
+                    }
+                };
+
+                const openImageModal = (imageSrc) => {
+                    modalImageSrc.value = imageSrc;
+                    showImageModal.value = true;
+                };
+
+                const closeImageModal = () => {
+                    showImageModal.value = false;
+                };
+
+                return {
+                    currentTab,
+                    tabs,
+                    activeDayIndex,
+                    itinerary,
+                    currentDay,
+                    packingList,
+                    team,
+                    toggleItem,
+                    getStopTypeColor,
+                    showImageModal,
+                    modalImageSrc,
+                    openImageModal,
+                    closeImageModal
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+
+</html>
