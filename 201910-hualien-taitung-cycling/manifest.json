@@ -1,0 +1,24 @@
+{
+    "name": "立秋北行 - 2019 單車之旅",
+    "short_name": "立秋北行",
+    "description": "2019年10月台東到花蓮單車環島之旅紀錄",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#f3f4f6",
+    "theme_color": "#f97316",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "assets/images/bike01.webp",
+            "sizes": "512x512",
+            "type": "image/webp",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": [
+        "travel",
+        "lifestyle"
+    ],
+    "lang": "zh-TW",
+    "dir": "ltr"
+}
