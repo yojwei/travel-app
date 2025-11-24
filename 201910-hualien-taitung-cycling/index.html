@@ -401,44 +401,57 @@
                     }
                 ];
 
-                const packingList = ref([
-                    {
-                        title: '一定要帶',
-                        icon: 'ph-star',
-                        color: 'text-red-500',
-                        items: [
-                            { name: '盥洗衣物 (穿1帶2)', checked: false },
-                            { name: '牙刷、毛巾、個人衛生用品', checked: false },
-                            { name: '行動電源、手機充電器', checked: false },
-                            { name: '兩截式雨衣(上衣) or 輕便雨衣', checked: false },
-                            { name: '證件 (健保卡)', checked: false },
-                            { name: '水壺', checked: false }
-                        ]
-                    },
-                    {
-                        title: '單車用品 (非常建議)',
-                        icon: 'ph-bicycle',
-                        color: 'text-blue-500',
-                        items: [
-                            { name: '車褲', checked: false },
-                            { name: '頭巾', checked: false },
-                            { name: '手套', checked: false },
-                            { name: '小帽', checked: false }
-                        ]
-                    },
-                    {
-                        title: '可能要帶',
-                        icon: 'ph-question',
-                        color: 'text-gray-500',
-                        items: [
-                            { name: '騎乘小背包', checked: false },
-                            { name: '防曬用品', checked: false },
-                            { name: '拖鞋', checked: false },
-                            { name: '塑膠袋數個', checked: false },
-                            { name: '雨傘', checked: false }
-                        ]
+                // Load packing list from localStorage or use default
+                const loadPackingList = () => {
+                    const saved = localStorage.getItem('packingList');
+                    if (saved) {
+                        try {
+                            return JSON.parse(saved);
+                        } catch (e) {
+                            console.error('Failed to parse saved packing list:', e);
+                        }
                     }
-                ]);
+                    return [
+                        {
+                            title: '一定要帶',
+                            icon: 'ph-star',
+                            color: 'text-red-500',
+                            items: [
+                                { name: '盥洗衣物 (穿1帶2)', checked: false },
+                                { name: '牙刷、毛巾、個人衛生用品', checked: false },
+                                { name: '行動電源、手機充電器', checked: false },
+                                { name: '兩截式雨衣(上衣) or 輕便雨衣', checked: false },
+                                { name: '證件 (健保卡)', checked: false },
+                                { name: '水壺', checked: false }
+                            ]
+                        },
+                        {
+                            title: '單車用品 (非常建議)',
+                            icon: 'ph-bicycle',
+                            color: 'text-blue-500',
+                            items: [
+                                { name: '車褲', checked: false },
+                                { name: '頭巾', checked: false },
+                                { name: '手套', checked: false },
+                                { name: '小帽', checked: false }
+                            ]
+                        },
+                        {
+                            title: '可能要帶',
+                            icon: 'ph-question',
+                            color: 'text-gray-500',
+                            items: [
+                                { name: '騎乘小背包', checked: false },
+                                { name: '防曬用品', checked: false },
+                                { name: '拖鞋', checked: false },
+                                { name: '塑膠袋數個', checked: false },
+                                { name: '雨傘', checked: false }
+                            ]
+                        }
+                    ];
+                };
+
+                const packingList = ref(loadPackingList());
 
                 const team = [
                     '郭佳', '君瑜', '楊欣', '君潔', '小K',
@@ -449,6 +462,8 @@
 
                 const toggleItem = (catIndex, itemIndex) => {
                     packingList.value[catIndex].items[itemIndex].checked = !packingList.value[catIndex].items[itemIndex].checked;
+                    // Save to localStorage
+                    localStorage.setItem('packingList', JSON.stringify(packingList.value));
                 };
 
                 const getStopTypeColor = (type) => {
