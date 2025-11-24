@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>旅遊記錄 - Travel Records</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+
+        .trip-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .trip-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 via-white to-orange-50 min-h-screen">
+
+    <div class="max-w-6xl mx-auto px-4 py-12">
+
+        <!-- Header -->
+        <header class="text-center mb-16">
+            <div class="inline-block mb-4">
+                <i class="ph ph-airplane-takeoff text-6xl text-blue-500"></i>
+            </div>
+            <h1 class="text-5xl font-bold text-gray-800 mb-3">旅遊記錄</h1>
+            <p class="text-gray-600 text-lg">Travel Records & Adventures</p>
+            <div class="mt-4 flex items-center justify-center gap-2 text-sm text-gray-500">
+                <i class="ph ph-map-pin"></i>
+                <span>探索台灣的美好時光</span>
+            </div>
+        </header>
+
+        <!-- Trip List -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <!-- Trip Card: 2019 花蓮台東單車行 -->
+            <a href="201910-hualien-taitung-cycling/index.html"
+                class="trip-card block bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100">
+                <div class="h-48 bg-gradient-to-br from-orange-400 to-pink-500 relative overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                        alt="花蓮台東海岸" class="w-full h-full object-cover opacity-80">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    <div class="absolute bottom-4 left-4 text-white">
+                        <div class="flex items-center gap-2 mb-1">
+                            <i class="ph ph-bicycle text-xl"></i>
+                            <span class="text-sm font-medium">單車之旅</span>
+                        </div>
+                        <h2 class="text-2xl font-bold">立秋北行</h2>
+                    </div>
+                </div>
+                <div class="p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-sm font-semibold text-orange-600 bg-orange-50 px-3 py-1 rounded-full">
+                            2019.10.10 - 10.14
+                        </span>
+                        <i class="ph ph-arrow-right text-gray-400"></i>
+                    </div>
+                    <p class="text-gray-600 text-sm leading-relaxed mb-3">
+                        台東 → 花蓮，沿著東海岸線騎行，探索美麗的海岸風光與部落文化。
+                    </p>
+                    <div class="flex items-center gap-4 text-xs text-gray-500">
+                        <span class="flex items-center gap-1">
+                            <i class="ph ph-map-trifold"></i>
+                            178 公里
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <i class="ph ph-calendar-blank"></i>
+                            4 天
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <i class="ph ph-users"></i>
+                            10 人
+                        </span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Placeholder for future trips -->
+            <div
+                class="trip-card block bg-gray-50 rounded-2xl overflow-hidden shadow-sm border-2 border-dashed border-gray-200 flex items-center justify-center min-h-[320px]">
+                <div class="text-center p-8">
+                    <i class="ph ph-plus-circle text-5xl text-gray-300 mb-3"></i>
+                    <p class="text-gray-400 font-medium">更多旅程</p>
+                    <p class="text-gray-300 text-sm mt-1">敬請期待...</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center mt-16 pt-8 border-t border-gray-200">
+            <p class="text-gray-400 text-sm">
+                <i class="ph ph-heart-fill text-red-400"></i>
+                記錄每一段旅程的美好
+            </p>
+        </footer>
+
+    </div>
+
+</body>
+
+</html>
