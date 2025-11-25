@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>花東放暑假 2025</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f0f9ff;
+            /* Light Blue background */
+        }
+
+        /* Hide scrollbar for horizontal scroll areas */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ocean: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        sand: {
+                            100: '#ffedd5',
+                            500: '#f97316',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div id="app" class="min-h-screen max-w-md mx-auto bg-white shadow-2xl relative overflow-hidden flex flex-col">
+
+        <!-- Header Image Area -->
+        <div class="relative h-48 bg-ocean-600">
+            <img src="https://www.eastcoast-nsa.gov.tw/image/28822/480x360" alt="Hualien Ocean"
+                class="w-full h-full object-cover opacity-80">
+            <div class="absolute inset-0 bg-gradient-to-b from-transparent to-ocean-900/90"></div>
+            <div class="absolute bottom-4 left-6 text-white">
+                <p class="text-sm font-medium tracking-widest uppercase text-ocean-100 mb-1">2025.09.05 - 09.09</p>
+                <h1 class="text-3xl font-bold text-white drop-shadow-md">花東放暑假</h1>
+                <div
+                    class="flex items-center mt-2 space-x-2 text-xs bg-white/20 w-fit px-2 py-1 rounded-full backdrop-blur-sm">
+                    <i data-lucide="users" class="w-3 h-3"></i>
+                    <span>2 人成行</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs (Sticky Top below header look, actually managed by state) -->
+        <div class="flex border-b border-gray-100 bg-white sticky top-0 z-20">
+            <button v-for="tab in tabs" :key="tab.id" @click="currentTab = tab.id"
+                class="flex-1 py-3 text-sm font-medium transition-colors duration-200 relative"
+                :class="currentTab === tab.id ? 'text-ocean-600' : 'text-gray-400 hover:text-gray-600'">
+                <span class="flex items-center justify-center gap-2">
+                    <i :data-lucide="tab.icon" class="w-4 h-4"></i>
+                    {{ tab.name }}
+                </span>
+                <div v-if="currentTab === tab.id" class="absolute bottom-0 left-0 w-full h-0.5 bg-ocean-500"></div>
+            </button>
+        </div>
+
+        <!-- Content Area -->
+        <div class="flex-1 overflow-y-auto bg-gray-50 p-4 pb-24 custom-scrollbar">
+
+            <!-- Itinerary View -->
+            <div v-if="currentTab === 'itinerary'" class="space-y-6">
+                <div v-for="(day, index) in itinerary" :key="index" class="relative pl-4 border-l-2 border-ocean-200">
+                    <div
+                        class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-ocean-500 border-2 border-white shadow-sm">
+                    </div>
+                    <div class="mb-4 cursor-pointer" @click="toggleDay(index)">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-lg font-bold text-gray-800">{{ day.date }} <span
+                                        class="text-sm font-normal text-gray-500 ml-1">({{ day.weekday }})</span></h2>
+                                <p class="text-xs text-ocean-600 font-medium">{{ day.location }}</p>
+                            </div>
+                            <i :data-lucide="day.expanded ? 'chevron-up' : 'chevron-down'"
+                                class="w-5 h-5 text-gray-400"></i>
+                        </div>
+                    </div>
+                    <div v-show="day.expanded" class="space-y-3">
+                        <div v-for="(item, idx) in day.events" :key="idx"
+                            class="bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex gap-3">
+                            <div class="flex-shrink-0 mt-1">
+                                <div :class="getEventIconBg(item.type)"
+                                    class="w-8 h-8 rounded-full flex items-center justify-center text-white">
+                                    <i :data-lucide="getEventIcon(item.type)" class="w-4 h-4"></i>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="font-medium text-gray-800">{{ item.title }}</h3>
+                                    <span v-if="item.time"
+                                        class="text-xs font-bold text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">{{
+                                        item.time }}</span>
+                                </div>
+                                <p v-if="item.desc" class="text-xs text-gray-500 mt-1">{{ item.desc }}</p>
+                                <div v-if="item.link" class="mt-2">
+                                    <a :href="item.link" target="_blank"
+                                        class="text-xs text-ocean-500 hover:underline flex items-center gap-1">
+                                        詳細資訊 <i data-lucide="external-link" class="w-3 h-3"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Optional Activities View -->
+            <div v-if="currentTab === 'options'" class="space-y-4">
+                <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i data-lucide="list-checks" class="w-4 h-4 text-purple-500"></i>
+                        待選行程
+                    </h3>
+                    <div class="space-y-3">
+                        <div v-for="(activity, idx) in optionalActivities" :key="idx"
+                            class="p-4 rounded-lg border border-gray-200 bg-gray-50 hover:bg-purple-50 hover:border-purple-200 transition-all">
+                            <div class="flex items-start gap-3">
+                                <div :class="getEventIconBg(activity.type)"
+                                    class="w-10 h-10 rounded-full flex items-center justify-center text-white flex-shrink-0">
+                                    <i :data-lucide="getEventIcon(activity.type)" class="w-5 h-5"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-base font-bold text-gray-800">{{ activity.title }}</h4>
+                                    <p class="text-xs text-gray-500 mt-1">{{ activity.desc }}</p>
+                                    <p class="text-xs text-purple-600 mt-2 flex items-center gap-1">
+                                        <i data-lucide="map-pin" class="w-3 h-3"></i>
+                                        {{ activity.location }}
+                                    </p>
+                                    <div v-if="activity.link" class="mt-2">
+                                        <a :href="activity.link" target="_blank"
+                                            class="text-xs text-ocean-500 hover:underline flex items-center gap-1">
+                                            詳細資訊 <i data-lucide="external-link" class="w-3 h-3"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info/Links View -->
+            <div v-if="currentTab === 'info'" class="space-y-4">
+                <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                    <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <i data-lucide="bookmark" class="w-4 h-4 text-sand-500"></i>
+                        重要連結
+                    </h3>
+                    <div class="space-y-3">
+                        <a v-for="(link, idx) in externalLinks" :key="idx" :href="link.url" target="_blank"
+                            class="block group">
+                            <div
+                                class="flex items-center p-3 rounded-lg border border-gray-200 bg-gray-50 group-hover:bg-ocean-50 group-hover:border-ocean-200 transition-all">
+                                <div class="bg-white p-2 rounded-md shadow-sm text-ocean-600 mr-3">
+                                    <i :data-lucide="link.icon" class="w-5 h-5"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-sm font-bold text-gray-700 group-hover:text-ocean-700">{{ link.title
+                                        }}</h4>
+                                    <p class="text-xs text-gray-400 truncate w-48">{{ link.url }}</p>
+                                </div>
+                                <i data-lucide="chevron-right"
+                                    class="w-4 h-4 text-gray-300 group-hover:text-ocean-400"></i>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-amber-50 rounded-xl p-4 border border-amber-100 text-amber-800 text-sm">
+                    <h4 class="font-bold mb-2 flex items-center gap-2">
+                        <i data-lucide="sticky-note" class="w-4 h-4"></i>
+                        備忘錄
+                    </h4>
+                    <ul class="list-disc list-inside space-y-1 text-xs opacity-80">
+                        <li>記得攜帶防曬用品、墨鏡。</li>
+                        <li>火車票需提前領取或使用電子票證。</li>
+                        <li>賞鯨行程可能需要暈船藥。</li>
+                        <li>月光海音樂節在戶外，建議攜帶野餐墊。</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Floating Action Button (Back to Top) -->
+        <div class="absolute bottom-6 right-6">
+            <button @click="scrollToTop"
+                class="flex items-center justify-center w-14 h-14 bg-ocean-600 text-white rounded-full shadow-lg hover:bg-ocean-700 transition-transform hover:scale-105">
+                <i data-lucide="arrow-up" class="w-6 h-6"></i>
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted, nextTick } = Vue;
+
+        createApp({
+            setup() {
+                const currentTab = ref('itinerary');
+
+                const tabs = [
+                    { id: 'itinerary', name: '行程', icon: 'calendar' },
+                    { id: 'options', name: '待選', icon: 'list-checks' },
+                    { id: 'info', name: '資訊', icon: 'info' }
+                ];
+
+                // Data mapped from "花東放暑假.xlsx - 工作表1.csv"
+                const itinerary = ref([
+                    {
+                        date: '9/5',
+                        weekday: '五',
+                        location: '基隆 Keelung',
+                        expanded: true,
+                        events: [
+                            { time: '下午', title: '台中 → 基隆', type: 'transport', desc: '國光客運' },
+                            { time: '18:00-23:00', title: '水燈節', type: 'event', desc: '基隆中元祭重頭戲', link: 'https://booking.keelung-for-a-walk.com/activities/kfr4vz06' },
+                            { time: '晚間', title: '住宿:中華郵輪文旅', type: 'stay', desc: '準備明日前往花蓮', link: 'https://www.google.com/maps/search/?api=1&query=中華郵輪文旅' }
+                        ]
+                    },
+                    {
+                        date: '9/6',
+                        weekday: '六',
+                        location: '花蓮 Hualien',
+                        expanded: false,
+                        events: [
+                            { time: '12:00前', title: '前往花蓮', type: 'transport', desc: '交通移動日' },
+                            { time: '抵達後', title: '租機車', type: 'misc', desc: '後站機車出租店', link: 'https://www.google.com/maps/search/?api=1&query=花蓮後站機車出租店' },
+                            { time: '午餐', title: '龍哥斯特', type: 'food', desc: '海洋主廚艾爾文', link: 'https://www.google.com/maps/search/?api=1&query=龍哥斯特+花蓮' },
+                            { time: '行程待選', title: '自由活動', type: 'misc', desc: '可安排市區逛逛' },
+                            { time: '晚間', title: '住宿:被浪打到民宿', type: 'stay', desc: '休息', link: 'https://www.google.com/maps/search/?api=1&query=被浪打到民宿+花蓮' }
+                        ]
+                    },
+                    {
+                        date: '9/7',
+                        weekday: '日',
+                        location: '台東 Taitung',
+                        expanded: false,
+                        events: [
+                            { time: '10:30', title: '多羅滿賞鯨', type: 'activity', desc: '出海尋找鯨豚', link: 'https://www.turumoan.com.tw/tw/index.php' },
+                            { time: '下午', title: '前往台東', type: 'transport', desc: '移動至台東' },
+                            { time: '抵達後', title: '租機車', type: 'misc', desc: '灰熊租車', link: 'https://www.google.com/maps/search/?api=1&query=灰熊租車+台東' },
+                            { time: '晚間', title: '住宿:那界17', type: 'stay', desc: '連住兩晚', link: 'https://www.google.com/maps/search/?api=1&query=那界17+台東' }
+                        ]
+                    },
+                    {
+                        date: '9/8',
+                        weekday: '一',
+                        location: '台東 Taitung',
+                        expanded: false,
+                        events: [
+                            { time: '16:00-22:00', title: '月光海音樂節', type: 'music', desc: '東海岸大地藝術節', link: 'https://www.eastcoast-nsa.gov.tw/teclandart/zh-tw/event/news/5621' },
+                            { time: '晚間', title: '住宿:那界17', type: 'stay', desc: '連住兩晚', link: 'https://www.google.com/maps/search/?api=1&query=那界17+台東' }
+                        ]
+                    },
+                    {
+                        date: '9/9',
+                        weekday: '二',
+                        location: '返程 Return',
+                        expanded: false,
+                        events: [
+                            { time: '13:30-17:38', title: '藍皮解憂號', type: 'train', desc: '台東 → 枋寮' },
+                            { time: '17:38-18:43', title: '晚餐', type: 'food', desc: '枳寮當地美食', link: 'https://www.google.com/maps/search/?api=1&query=枳寮火車站附近+餐廳' },
+                            { time: '18:43-2203', title: '自強 3000', type: 'transport', desc: '枋寮 → 台中' }
+                        ]
+                    }
+                ]);
+
+                const externalLinks = ref([
+                    { title: '水燈節預約', url: 'https://booking.keelung-for-a-walk.com/activities/kfr4vz06', icon: 'flame' },
+                    { title: '多羅滿賞鯨', url: 'https://www.turumoan.com.tw/tw/index.php', icon: 'anchor' },
+                    { title: '月光海音樂節', url: 'https://www.eastcoast-nsa.gov.tw/teclandart/zh-tw/event/news/5621', icon: 'music' },
+                    { title: '河上餐桌表單', url: 'https://docs.google.com/forms/d/e/1FAIpQLSc...', icon: 'utensils' }
+                ]);
+
+                const optionalActivities = ref([
+                    { title: '赤柯山金針花', type: 'flower', desc: '季節限定美景，8-9月盛開', location: '花蓮玉里' }, { title: '河上餐桌', type: 'food', desc: '在河床上享用在地美食的獨特體驗', location: '台東關山', link: 'https://docs.google.com/forms/d/e/1FAIpQLSc...' },
+                    { title: '肉肉餐桌', type: 'food', desc: '台東特色餐飲體驗', location: '台東' },]);
+
+
+                // Styling Helpers
+                const getEventIcon = (type) => {
+                    const map = {
+                        transport: 'bus',
+                        stay: 'bed-double',
+                        event: 'sparkles',
+                        food: 'utensils',
+                        activity: 'waves', // Whale
+                        misc: 'map-pin',
+                        flower: 'flower-2',
+                        music: 'music',
+                        train: 'train'
+                    };
+                    return map[type] || 'circle';
+                };
+
+                const getEventIconBg = (type) => {
+                    const map = {
+                        transport: 'bg-blue-400',
+                        stay: 'bg-indigo-400',
+                        event: 'bg-red-400',
+                        food: 'bg-yellow-500',
+                        activity: 'bg-cyan-500',
+                        music: 'bg-purple-500',
+                        flower: 'bg-pink-400',
+                        train: 'bg-emerald-500'
+                    };
+                    return map[type] || 'bg-gray-400';
+                };
+
+
+                onMounted(() => {
+                    // Load expanded states from localStorage
+                    const savedStates = localStorage.getItem('itinerary-expanded-states');
+                    if (savedStates) {
+                        try {
+                            const states = JSON.parse(savedStates);
+                            itinerary.value.forEach((day, index) => {
+                                if (states[index] !== undefined) {
+                                    day.expanded = states[index];
+                                }
+                            });
+                        } catch (e) {
+                            console.error('Failed to parse saved states:', e);
+                        }
+                    }
+                    lucide.createIcons();
+                });
+
+                // Re-render icons when tab changes
+                const watchTab = () => {
+                    nextTick(() => {
+                        lucide.createIcons();
+                    });
+                };
+
+                const scrollToTop = () => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                };
+
+                const toggleDay = (index) => {
+                    itinerary.value[index].expanded = !itinerary.value[index].expanded;
+
+                    // Save expanded states to localStorage
+                    const states = itinerary.value.map(day => day.expanded);
+                    localStorage.setItem('itinerary-expanded-states', JSON.stringify(states));
+
+                    nextTick(() => {
+                        lucide.createIcons();
+                    });
+                };
+
+                return {
+                    currentTab,
+                    tabs,
+                    itinerary,
+                    externalLinks,
+                    optionalActivities,
+                    getEventIcon,
+                    getEventIconBg,
+                    watchTab,
+                    scrollToTop,
+                    toggleDay
+                };
+            },
+            watch: {
+                currentTab() {
+                    this.watchTab();
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+
+</html>
