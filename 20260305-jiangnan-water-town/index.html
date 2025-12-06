@@ -182,26 +182,17 @@
 
                                     <!-- Content -->
                                     <div>
-                                        <h3 class="text-lg font-bold text-gray-800 mb-1 flex items-center justify-between cursor-pointer"
-                                            @click="spot.expanded = !spot.expanded">
+                                        <h3 class="text-lg font-bold text-gray-800 mb-2">
                                             {{ spot.name }}
-                                            <i
-                                                :class="['fas text-xs text-gray-400 transition-transform', spot.expanded ? 'fa-chevron-up' : 'fa-chevron-down']"></i>
                                         </h3>
 
-                                        <transition name="slide-up">
-                                            <div v-if="spot.expanded"
-                                                class="mt-2 text-sm text-gray-600 leading-relaxed bg-gray-50 p-3 rounded-lg border border-gray-100">
-                                                {{ spot.desc }}
-                                            </div>
-                                            <div v-else class="text-sm text-gray-500 line-clamp-2"
-                                                @click="spot.expanded = true">
-                                                {{ spot.desc }}
-                                            </div>
-                                        </transition>
+                                        <div
+                                            class="text-sm text-gray-600 leading-relaxed bg-gray-50 p-3 rounded-lg border border-gray-100 mb-2">
+                                            {{ spot.desc }}
+                                        </div>
 
                                         <!-- Tags if any (Simulated based on context) -->
-                                        <div class="mt-2 flex flex-wrap gap-1">
+                                        <div class="flex flex-wrap gap-1">
                                             <span v-if="spot.name.includes('古鎮') || spot.name.includes('老街')"
                                                 class="px-2 py-0.5 bg-amber-50 text-amber-600 text-[10px] rounded-full">古韻</span>
                                             <span v-if="spot.name.includes('夜遊') || spot.name.includes('燈')"
@@ -323,6 +314,14 @@
                 </div>
             </transition>
 
+            <!-- Scroll to Top Button -->
+            <div class="flex justify-center py-6">
+                <button @click="scrollToTop"
+                    class="bg-primary hover:bg-teal-700 text-white px-6 py-2 rounded-full font-semibold shadow-lg shadow-primary/30 transform hover:scale-105 transition-all flex items-center gap-2">
+                    <i class="fas fa-chevron-up"></i>回到頂部
+                </button>
+            </div>
+
         </main>
     </div>
 
@@ -343,8 +342,7 @@
                         spots: [
                             {
                                 name: '工人路美食街',
-                                desc: '抵達海寧後，可前往工人路美食街品嚐在地小吃，感受海寧的夜生活氛圍。',
-                                expanded: false
+                                desc: '抵達海寧後，可前往工人路美食街品嚐在地小吃，感受海寧的夜生活氛圍。'
                             }
                         ]
                     },
@@ -354,12 +352,12 @@
                         meals: { lunch: '紹興風味', dinner: '皮城風味' },
                         hotel: '戴斯精選溫德姆酒店 或同級',
                         spots: [
-                            { name: '南關廂古街', desc: '古街濃縮海寧百年商業文化，古宅、茶館與舊鋪林立，漫遊其間可品茶、購物，感受古城的文雅氣質。', expanded: true },
-                            { name: '海寧皮革城時尚小鎮', desc: '經典皮革工藝聞名國際，商品從皮衣、皮包到靴子應有盡有，是時尚購物重地。', expanded: false },
-                            { name: '鹽官古鎮', desc: '以「海寧潮」聞名，古鎮內的海神廟、古街巷與潮文化展館訴說著千年治水故事。', expanded: false },
-                            { name: '觀潮公園', desc: '欣賞錢塘江大潮，潮水如巨牆般推進，氣勢磅礡，是世界罕見的自然奇觀。', expanded: false },
-                            { name: '黃酒博物館', desc: '全中國唯一全面展示黃酒文化的博物館，介紹釀造工藝與典故，體驗濃濃酒鄉風情。', expanded: false },
-                            { name: '倉橋老街', desc: '保留大量明清古店鋪，穿過石板街巷，能看到居民悠哉生活、河岸洗衣等道地江南日常。', expanded: false },
+                            { name: '南關廂古街', desc: '古街濃縮海寧百年商業文化，古宅、茶館與舊鋪林立，漫遊其間可品茶、購物，感受古城的文雅氣質。' },
+                            { name: '海寧皮革城時尚小鎮', desc: '經典皮革工藝聞名國際，商品從皮衣、皮包到靴子應有盡有，是時尚購物重地。' },
+                            { name: '鹽官古鎮', desc: '以「海寧潮」聞名，古鎮內的海神廟、古街巷與潮文化展館訴說著千年治水故事。' },
+                            { name: '觀潮公園', desc: '欣賞錢塘江大潮，潮水如巨牆般推進，氣勢磅礡，是世界罕見的自然奇觀。' },
+                            { name: '黃酒博物館', desc: '全中國唯一全面展示黃酒文化的博物館，介紹釀造工藝與典故，體驗濃濃酒鄉風情。' },
+                            { name: '倉橋老街', desc: '保留大量明清古店鋪，穿過石板街巷，能看到居民悠哉生活、河岸洗衣等道地江南日常。' },
                         ]
                     },
                     {
@@ -368,11 +366,11 @@
                         meals: { lunch: '鹽官風味', dinner: '烏鎮風味' },
                         hotel: '枕水飯店 / 通安客棧 或同級',
                         spots: [
-                            { name: '柯岩風景區', desc: '以人工與自然共構的奇岩景觀著稱，雲骨山、立石等均為紹興地貌代表。', expanded: true },
-                            { name: '魯鎮 (含遊船)', desc: '以魯迅作品為基礎打造的文化小鎮，重現小說場景，搭船穿梭水巷彷彿置身文學電影。', expanded: false },
-                            { name: '蘭亭景區', desc: '王羲之曲水流觴之地，柳樹依依，可一覽《蘭亭集序》著名碑刻。', expanded: false },
-                            { name: '烏鎮西柵景區', desc: '中國最經典水鄉，河道縱橫、白牆黛瓦，夜景尤其迷人，是攝影師最愛。', expanded: false },
-                            { name: '提燈走橋', desc: '烏鎮特有夜遊體驗，手提古味燈籠走過石橋，欣賞水鄉倒映光影。', expanded: false },
+                            { name: '柯岩風景區', desc: '以人工與自然共構的奇岩景觀著稱，雲骨山、立石等均為紹興地貌代表。' },
+                            { name: '魯鎮 (含遊船)', desc: '以魯迅作品為基礎打造的文化小鎮，重現小說場景，搭船穿梭水巷彷彿置身文學電影。' },
+                            { name: '蘭亭景區', desc: '王羲之曲水流觴之地，柳樹依依，可一覽《蘭亭集序》著名碑刻。' },
+                            { name: '烏鎮西柵景區', desc: '中國最經典水鄉，河道縱橫、白牆黛瓦，夜景尤其迷人，是攝影師最愛。' },
+                            { name: '提燈走橋', desc: '烏鎮特有夜遊體驗，手提古味燈籠走過石橋，欣賞水鄉倒映光影。' },
                         ]
                     },
                     {
@@ -381,11 +379,11 @@
                         meals: { lunch: '水鄉風味', dinner: '滬派料理' },
                         hotel: '曙光薇飯店 / 三甲港鉑派飯店 或同級',
                         spots: [
-                            { name: '藍印布坊', desc: '展示傳統藍染工藝，曬布場布匹隨風飄動，是烏鎮最具代表性的畫面。', expanded: true },
-                            { name: '醬園', desc: '曬缸遍布，展示古法釀造豆瓣醬、醬油等工藝，充滿醬香氣息。', expanded: false },
-                            { name: '南京路', desc: '中華第一街，商店林立，夜晚燈火輝煌，上海最繁華地段。', expanded: false },
-                            { name: '外灘', desc: '萬國建築博覽群，與對岸浦東摩天大樓形成新舊交錯的壯觀天際線。', expanded: false },
-                            { name: '黃浦江夜遊船', desc: '沿著母親河航行，飽覽兩岸壯麗的城市夜景，一生必看一次。', expanded: false },
+                            { name: '藍印布坊', desc: '展示傳統藍染工藝，曬布場布匹隨風飄動，是烏鎮最具代表性的畫面。' },
+                            { name: '醬園', desc: '曬缸遍布，展示古法釀造豆瓣醬、醬油等工藝，充滿醬香氣息。' },
+                            { name: '南京路', desc: '中華第一街，商店林立，夜晚燈火輝煌，上海最繁華地段。' },
+                            { name: '外灘', desc: '萬國建築博覽群，與對岸浦東摩天大樓形成新舊交錯的壯觀天際線。' },
+                            { name: '黃浦江夜遊船', desc: '沿著母親河航行，飽覽兩岸壯麗的城市夜景，一生必看一次。' },
                         ]
                     },
                     {
@@ -394,19 +392,24 @@
                         meals: { lunch: '中式合菜', dinner: '溫暖的家' },
                         hotel: '溫暖的家',
                         spots: [
-                            { name: '城隍廟商圈', desc: '最具老城風情，匯集南翔小籠包等在地美食與古建築。', expanded: true },
-                            { name: '九曲橋', desc: '曲折九次象徵步步高升，護城河與古建築相互映襯。', expanded: false },
-                            { name: '張園', desc: '上海時尚文青街區，融合海派建築與潮流空間，好拍又好逛。', expanded: false },
-                            { name: '星巴克工坊', desc: '世界級咖啡工坊，結合烘豆、調酒與麵包坊，空間宏大。', expanded: false },
-                            { name: '1192老上海風情街', desc: '再現石庫門老建築與復古氛圍，充滿情調的打卡新熱點。', expanded: false },
+                            { name: '城隍廟商圈', desc: '最具老城風情，匯集南翔小籠包等在地美食與古建築。' },
+                            { name: '九曲橋', desc: '曲折九次象徵步步高升，護城河與古建築相互映襯。' },
+                            { name: '張園', desc: '上海時尚文青街區，融合海派建築與潮流空間，好拍又好逛。' },
+                            { name: '星巴克工坊', desc: '世界級咖啡工坊，結合烘豆、調酒與麵包坊，空間宏大。' },
+                            { name: '1192老上海風情街', desc: '再現石庫門老建築與復古氛圍，充滿情調的打卡新熱點。' },
                         ]
                     }
                 ]);
 
+                const scrollToTop = () => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                };
+
                 return {
                     currentTab,
                     activeDay,
-                    itinerary
+                    itinerary,
+                    scrollToTop
                 }
             }
         }).mount('#app');
