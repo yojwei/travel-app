@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>墾丁四重溪舒壓三日遊</title>
+
+    <!-- Meta Tags for SEO & OG -->
+    <meta name="description" content="三天兩夜墾丁四重溪溫泉舒壓之旅，包含看海美術館、落山風藝術季與雙流森林步道。">
+    <meta property="og:title" content="墾丁四重溪舒壓三日遊">
+    <meta property="og:description" content="Day 1 看海藝術季 | Day 2 溫泉Chill | Day 3 森林浴">
+    <meta property="og:image"
+        content="https://images.unsplash.com/photo-1519046904884-53103b34b206?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80">
+    <meta property="og:type" content="website">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans TC', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#0d9488', // Teal-600
+                        secondary: '#f0fdfa', // Teal-50
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Custom Scrollbar Hide for cleaner UI */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Modal Transition */
+        .fade-enter-active,
+        .fade-leave-active {
+            transition: opacity 0.3s ease;
+        }
+
+        .fade-enter-from,
+        .fade-leave-to {
+            opacity: 0;
+        }
+
+        .slide-up-enter-active,
+        .slide-up-leave-active {
+            transition: transform 0.3s ease-out;
+        }
+
+        .slide-up-enter-from,
+        .slide-up-leave-to {
+            transform: translateY(100%);
+        }
+
+        /* Image Loading Skeleton Animation */
+        .skeleton {
+            background: linear-gradient(90deg, #e5e5e5 25%, #f0f0f0 50%, #e5e5e5 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        @keyframes loading {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-stone-50 text-stone-800 font-sans antialiased overflow-hidden select-none">
+
+    <div id="app" class="h-[100dvh] flex flex-col relative">
+
+        <!-- Main Content Area (Scrollable) -->
+        <main ref="mainContent" class="flex-1 overflow-y-auto pb-24 no-scrollbar scroll-smooth">
+
+            <!-- Dynamic Hero Section -->
+            <div class="relative h-64 w-full">
+                <img :src="heroImage" class="w-full h-full object-cover transition-opacity duration-500"
+                    alt="Hero Banner" @error="handleHeroError">
+                <div class="absolute inset-0 bg-gradient-to-t from-stone-900/80 via-stone-900/30 to-transparent"></div>
+                <div class="absolute bottom-4 left-4 right-4 text-white">
+                    <div
+                        class="inline-flex items-center space-x-1 bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-medium mb-2">
+                        <i data-lucide="calendar" class="w-3 h-3"></i>
+                        <span>{{ currentData.date }}</span>
+                    </div>
+                    <h1 class="text-2xl font-bold leading-tight">{{ currentData.title }}</h1>
+                    <p class="text-stone-200 text-sm mt-1 opacity-90">{{ currentData.subtitle }}</p>
+                </div>
+            </div>
+
+            <!-- Itinerary Timeline -->
+            <div v-if="currentTab !== 'info'" class="px-4 py-6 space-y-6">
+
+                <!-- Timeline Connector Line (Visual only) -->
+                <div class="absolute left-8 top-64 bottom-24 w-0.5 bg-stone-200 -z-10 hidden"></div>
+
+                <div v-for="(item, index) in currentData.schedule" :key="item.id"
+                    class="bg-white rounded-xl shadow-sm border border-stone-100 overflow-hidden active:scale-[0.98] transition-transform duration-200"
+                    @click="openModal(item)">
+
+                    <!-- Card Image -->
+                    <div class="h-40 w-full bg-stone-200 relative overflow-hidden">
+                        <img :src="item.image" class="w-full h-full object-cover" :alt="item.title" loading="lazy"
+                            @error="handleImageError">
+                        <div
+                            class="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-2 py-1 rounded-md text-xs font-bold text-stone-800 shadow-sm">
+                            {{ item.time }}
+                        </div>
+                    </div>
+
+                    <!-- Card Content -->
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-lg text-stone-800">{{ item.title }}</h3>
+                            <i data-lucide="chevron-right" class="w-5 h-5 text-stone-400"></i>
+                        </div>
+                        <p class="text-stone-500 text-sm line-clamp-2 leading-relaxed">
+                            {{ item.desc }}
+                        </p>
+
+                        <!-- Tags -->
+                        <div class="flex gap-2 mt-3">
+                            <span v-if="item.tags" v-for="tag in item.tags"
+                                class="text-xs bg-stone-100 text-stone-600 px-2 py-1 rounded-full">
+                                #{{ tag }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- End of Day Message -->
+                <div class="text-center py-8 opacity-50">
+                    <i data-lucide="moon" class="w-6 h-6 mx-auto mb-2 text-stone-400"></i>
+                    <p class="text-sm text-stone-500">Day {{ currentData.dayNum }} 行程結束</p>
+                </div>
+            </div>
+
+            <!-- Info Tab Content -->
+            <div v-else class="px-4 py-6 space-y-6">
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-stone-100">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <i data-lucide="backpack" class="w-5 h-5 text-primary"></i>
+                        行前準備
+                    </h3>
+                    <ul class="space-y-3 text-sm text-stone-600">
+                        <li class="flex items-start gap-2">
+                            <i data-lucide="check-circle-2" class="w-4 h-4 text-green-500 mt-0.5"></i>
+                            落山風大，務必攜帶防風薄外套與帽子。
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i data-lucide="check-circle-2" class="w-4 h-4 text-green-500 mt-0.5"></i>
+                            泳衣、泳帽（飯店大眾池與SPA需穿著）。
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i data-lucide="check-circle-2" class="w-4 h-4 text-green-500 mt-0.5"></i>
+                            好走的鞋（雙流步道、看海美術館需步行）。
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i data-lucide="check-circle-2" class="w-4 h-4 text-green-500 mt-0.5"></i>
+                            防曬乳與太陽眼鏡（海邊紫外線強）。
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-stone-100">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <i data-lucide="alert-triangle" class="w-5 h-5 text-orange-500"></i>
+                        緊急聯絡
+                    </h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between border-b border-stone-100 pb-2">
+                            <span class="text-stone-500">四重溪溫泉飯店</span>
+                            <a href="tel:08882xxxx" class="text-blue-600 font-medium">08-882-XXXX</a>
+                        </div>
+                        <div class="flex justify-between border-b border-stone-100 pb-2">
+                            <span class="text-stone-500">雙流國家森林遊樂區</span>
+                            <a href="tel:08870xxxx" class="text-blue-600 font-medium">08-870-XXXX</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav
+            class="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 px-2 pb-safe pt-2 h-[80px] flex justify-around items-start z-40 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+            <button v-for="tab in tabs" :key="tab.id" @click="currentTab = tab.id"
+                class="flex flex-col items-center justify-center w-16 p-1 transition-all duration-300"
+                :class="currentTab === tab.id ? 'text-primary' : 'text-stone-400 hover:text-stone-600'">
+                <div class="mb-1 transition-transform duration-300"
+                    :class="currentTab === tab.id ? '-translate-y-1' : ''">
+                    <i :data-lucide="tab.icon" class="w-6 h-6"></i>
+                </div>
+                <span class="text-[10px] font-medium tracking-wide">{{ tab.label }}</span>
+                <span class="w-1 h-1 rounded-full bg-primary mt-1 transition-opacity duration-300"
+                    :class="currentTab === tab.id ? 'opacity-100' : 'opacity-0'"></span>
+            </button>
+        </nav>
+
+        <!-- Detail Modal (Bottom Sheet Style) -->
+        <transition name="fade">
+            <div v-if="isModalOpen"
+                class="fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center backdrop-blur-sm"
+                @click.self="closeModal">
+                <transition name="slide-up" appear>
+                    <div v-if="isModalOpen"
+                        class="bg-white w-full sm:w-[90%] sm:max-w-md sm:rounded-2xl rounded-t-2xl h-[85vh] sm:h-[80vh] flex flex-col shadow-2xl overflow-hidden">
+
+                        <!-- Modal Header Image -->
+                        <div class="relative h-56 shrink-0 bg-stone-200">
+                            <img :src="selectedSpot.image" class="w-full h-full object-cover" @error="handleImageError">
+                            <button @click="closeModal"
+                                class="absolute top-4 right-4 bg-black/30 hover:bg-black/50 text-white rounded-full p-2 backdrop-blur-md transition-colors">
+                                <i data-lucide="x" class="w-5 h-5"></i>
+                            </button>
+                            <div
+                                class="absolute bottom-0 left-0 right-0 p-5 bg-gradient-to-t from-white via-white/80 to-transparent pt-12">
+                                <h2 class="text-2xl font-bold text-stone-900">{{ selectedSpot.title }}</h2>
+                            </div>
+                        </div>
+
+                        <!-- Modal Body -->
+                        <div class="flex-1 overflow-y-auto p-5 pt-0">
+                            <!-- Meta Info -->
+                            <div class="flex flex-wrap gap-3 mb-6 mt-2">
+                                <div
+                                    class="flex items-center text-xs font-medium bg-stone-100 px-3 py-1.5 rounded-full text-stone-600">
+                                    <i data-lucide="clock" class="w-3.5 h-3.5 mr-1.5"></i>
+                                    {{ selectedSpot.time }}
+                                </div>
+                                <div class="flex items-center text-xs font-medium bg-stone-100 px-3 py-1.5 rounded-full text-stone-600"
+                                    v-if="selectedSpot.info.wear">
+                                    <i data-lucide="shirt" class="w-3.5 h-3.5 mr-1.5"></i>
+                                    {{ selectedSpot.info.wear }}
+                                </div>
+                                <div class="flex items-center text-xs font-medium bg-stone-100 px-3 py-1.5 rounded-full text-stone-600"
+                                    v-if="selectedSpot.info.price">
+                                    <i data-lucide="ticket" class="w-3.5 h-3.5 mr-1.5"></i>
+                                    {{ selectedSpot.info.price }}
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="prose prose-stone prose-sm mb-6">
+                                <p class="text-stone-600 leading-relaxed text-base">{{ selectedSpot.desc }}</p>
+                            </div>
+
+                            <!-- Tips Section -->
+                            <div v-if="selectedSpot.tips"
+                                class="bg-yellow-50 border border-yellow-100 rounded-lg p-4 mb-6">
+                                <h4 class="text-yellow-800 font-bold text-sm mb-2 flex items-center">
+                                    <i data-lucide="lightbulb" class="w-4 h-4 mr-2"></i>
+                                    貼心小撇步
+                                </h4>
+                                <p class="text-yellow-700 text-sm leading-relaxed">{{ selectedSpot.tips }}</p>
+                            </div>
+
+                        </div>
+
+                        <!-- Modal Footer -->
+                        <div class="p-4 border-t border-stone-100 bg-white pb-safe">
+                            <a :href="googleMapLink" target="_blank"
+                                class="flex items-center justify-center w-full bg-primary hover:bg-teal-700 text-white font-bold py-3.5 rounded-xl transition-colors shadow-md shadow-teal-200 active:scale-[0.98]">
+                                <i data-lucide="map-pin" class="w-5 h-5 mr-2"></i>
+                                導航前往
+                            </a>
+                        </div>
+                    </div>
+                </transition>
+            </div>
+        </transition>
+
+    </div>
+
+    <script>
+        const { createApp, ref, computed, watch, nextTick, onMounted, onUpdated } = Vue;
+
+        createApp({
+            setup() {
+                // --- State ---
+                const currentTab = ref('day1');
+                const mainContent = ref(null);
+                const isModalOpen = ref(false);
+                const selectedSpot = ref({});
+
+                // --- Static Data ---
+                const tabs = [
+                    { id: 'day1', label: 'Day 1', icon: 'sunset' },
+                    { id: 'day2', label: 'Day 2', icon: 'coffee' },
+                    { id: 'day3', label: 'Day 3', icon: 'trees' },
+                    { id: 'info', label: '資訊', icon: 'info' }
+                ];
+
+                const scheduleData = {
+                    day1: {
+                        dayNum: 1,
+                        date: '第一天',
+                        title: '藝術季與海風',
+                        subtitle: '看海美術館 · 落山風 · 四重溪',
+                        heroImage: 'https://images.unsplash.com/photo-1544642083-294747769646?q=80&w=1000&auto=format&fit=crop', // Art/Museum vibe
+                        schedule: [
+                            {
+                                id: 101,
+                                time: '10:00',
+                                title: '仁德交流道集合',
+                                location: '仁德交流道',
+                                image: 'https://images.unsplash.com/photo-1532966203099-23c3104889c0?auto=format&fit=crop&w=800&q=80', // Car/Highway
+                                desc: '集合出發，準備迎接美好的假期！',
+                                tags: ['集合'],
+                                info: { wear: '輕便', price: '無' }
+                            },
+                            {
+                                id: 102,
+                                time: '10:30',
+                                title: '仁武烤鴨午餐',
+                                location: '仁武烤鴨',
+                                image: 'https://images.unsplash.com/photo-1596627747808-8df09d784a62?auto=format&fit=crop&w=800&q=80', // Roast Duck/Food
+                                desc: '在地排隊名店，皮脆肉嫩的烤鴨，補充體力好上路。',
+                                tags: ['午餐', '美食'],
+                                info: { wear: '休閒', price: '約 $300/人' }
+                            },
+                            {
+                                id: 103,
+                                time: '13:00',
+                                title: '看海美術館 & 落山風',
+                                location: '看海美術館',
+                                image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80', // Sea/Beach
+                                desc: '前往海口港看海美術館，若適逢藝術季可欣賞海岸裝置藝術。在海邊拍照、喝飲料，感受國境之南的風。',
+                                tips: '落山風季節風力極強，務必攜帶防風外套、帽子請戴穩，注意防曬。',
+                                tags: ['拍照', '景點'],
+                                info: { wear: '防風衣物', price: '免費/依展覽' }
+                            },
+                            {
+                                id: 104,
+                                time: '16:30',
+                                title: '四重溪飯店 Check-in',
+                                location: '四重溪溫泉',
+                                image: 'https://images.unsplash.com/photo-1563720970335-502a5789139f?auto=format&fit=crop&w=800&q=80', // Hotel/Room
+                                desc: '前往四重溪辦理入住，稍作休息，採買零食飲料。',
+                                tags: ['住宿', '休息'],
+                                info: { wear: '輕鬆', price: '' }
+                            },
+                            {
+                                id: 105,
+                                time: '18:30',
+                                title: '曹員外的店 晚餐',
+                                location: '曹員外的店',
+                                image: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=800&q=80', // Chinese Food
+                                desc: '享用在地美味合菜（大桌菜），適合多人聚餐。想吃簡單一點也可選擇附近的溫泉餐廳。',
+                                tips: '建議提前訂位，招牌菜需預留。',
+                                tags: ['晚餐'],
+                                info: { wear: '休閒', price: '約 $400/人' }
+                            },
+                            {
+                                id: 106,
+                                time: '20:00',
+                                title: '夜間泡湯 Chill',
+                                location: '四重溪溫泉公園',
+                                image: 'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=800&q=80', // Hot Spring/Night
+                                desc: '在房內浴池或飯店大眾池享受美人湯。若有溫泉季燈飾活動，可散步至溫泉公園夜拍。',
+                                tags: ['溫泉', '放鬆'],
+                                info: { wear: '泳衣(大眾池)', price: '含住宿' }
+                            }
+                        ]
+                    },
+                    day2: {
+                        dayNum: 2,
+                        date: '第二天',
+                        title: '溫泉鄉慢活',
+                        subtitle: '自然醒 · 泡湯 · 散步',
+                        heroImage: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80', // Relax/Spa
+                        schedule: [
+                            {
+                                id: 201,
+                                time: '09:00',
+                                title: '睡到自然醒 & 早餐',
+                                location: '四重溪',
+                                image: 'https://images.unsplash.com/photo-1493770348161-369560ae357d?auto=format&fit=crop&w=800&q=80', // Breakfast
+                                desc: '享受沒有鬧鐘的早晨，吃完早餐後可以賴在房間繼續泡湯，或去公園煮溫泉蛋。',
+                                tips: '這一天重點就是「懶」，不要趕行程。',
+                                tags: ['早餐', '慢活'],
+                                info: { wear: '睡衣/輕便', price: '住宿含' }
+                            },
+                            {
+                                id: 202,
+                                time: '14:00',
+                                title: '四重溪小旅行',
+                                location: '清泉日式溫泉館',
+                                image: 'https://images.unsplash.com/photo-1515238152791-8216bfdf89a7?auto=format&fit=crop&w=800&q=80', // Japanese Garden/Vibe
+                                desc: '下午可選擇：1. 清泉日式溫泉館拍照（日式庭園風）。 2. 海口港喝咖啡。 3. 老街散步吃甜點。',
+                                tags: ['下午茶', '散步'],
+                                info: { wear: '好拍照的', price: '自費' }
+                            },
+                            {
+                                id: 203,
+                                time: '18:00',
+                                title: '大山羊肉爐',
+                                location: '大山羊肉爐',
+                                image: 'https://images.unsplash.com/photo-1547496502-ffa222320faf?auto=format&fit=crop&w=800&q=80', // Hot Pot
+                                desc: '四重溪知名的羊肉爐，湯頭濃郁暖身。晚餐後可回飯店繼續泡湯、玩桌遊、小酌聊天。',
+                                tips: '羊肉爐人氣很旺，可能需要排隊。',
+                                tags: ['晚餐', '必吃'],
+                                info: { wear: '休閒', price: '約 $500/人' }
+                            }
+                        ]
+                    },
+                    day3: {
+                        dayNum: 3,
+                        date: '第三天',
+                        title: '森林深呼吸',
+                        subtitle: '雙流步道 · 萬巒豬腳 · 返家',
+                        heroImage: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=800&q=80', // Forest/Nature
+                        schedule: [
+                            {
+                                id: 301,
+                                time: '09:00',
+                                title: '退房前往雙流',
+                                location: '四重溪',
+                                image: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=800&q=80', // Camping/Car
+                                desc: '整理行李，check-out。車程約 40-50 分鐘前往雙流。',
+                                tags: ['交通'],
+                                info: { wear: '', price: '' }
+                            },
+                            {
+                                id: 302,
+                                time: '10:00',
+                                title: '雙流國家森林遊樂區',
+                                location: '雙流國家森林遊樂區',
+                                image: 'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=800&q=80', // Forest/Waterfall
+                                desc: '享受森林溪谷與瀑布，大多為平緩小徑，適合全家大小。可以泡腳玩冰水，來回約 2-3 小時。',
+                                tips: '建議穿著防滑好走的鞋子，並攜帶水與毛巾。',
+                                tags: ['健行', '自然'],
+                                info: { wear: '運動鞋', price: '門票約 $100' }
+                            },
+                            {
+                                id: 303,
+                                time: '13:00',
+                                title: '萬巒豬腳 午餐',
+                                location: '海鴻飯店',
+                                image: 'https://images.unsplash.com/photo-1605333143527-3101e40a02bc?auto=format&fit=crop&w=800&q=80', // Pork/Food
+                                desc: '下山後享用著名的萬巒豬腳，Q彈入味。吃飽後一路北上。',
+                                tags: ['午餐', '特產'],
+                                info: { wear: '休閒', price: '約 $350/人' }
+                            },
+                            {
+                                id: 304,
+                                time: '17:30',
+                                title: '聯盈發點心專門店',
+                                location: '聯盈發點心專門店',
+                                image: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80', // Dim Sum
+                                desc: '回到台南享用港式點心晚餐，為這趟旅程畫下完美句點。',
+                                tags: ['晚餐', '港點'],
+                                info: { wear: '休閒', price: '約 $300/人' }
+                            }
+                        ]
+                    }
+                };
+
+                // --- Computed ---
+                const currentData = computed(() => {
+                    return scheduleData[currentTab.value] || scheduleData.day1;
+                });
+
+                const heroImage = computed(() => {
+                    return currentData.value.heroImage;
+                });
+
+                const googleMapLink = computed(() => {
+                    if (!selectedSpot.value.location) return '#';
+                    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedSpot.value.location)}`;
+                });
+
+                // --- Methods ---
+                const openModal = (item) => {
+                    selectedSpot.value = item;
+                    isModalOpen.value = true;
+                };
+
+                const closeModal = () => {
+                    isModalOpen.value = false;
+                };
+
+                const handleImageError = (e) => {
+                    // Fallback image in case Unsplash fails
+                    e.target.src = 'https://dummyimage.com/800x600/e7e5e4/78716c.jpg&text=No+Image';
+                };
+
+                const handleHeroError = (e) => {
+                    e.target.src = 'https://dummyimage.com/1000x800/2d2d2d/fff.jpg&text=Travel';
+                };
+
+                const refreshIcons = () => {
+                    // Slight delay to ensure DOM is ready
+                    setTimeout(() => {
+                        if (window.lucide) {
+                            window.lucide.createIcons();
+                        }
+                    }, 50);
+                };
+
+                // --- Watchers & Lifecycle ---
+                watch(currentTab, async () => {
+                    await nextTick();
+                    // Scroll to top
+                    if (mainContent.value) {
+                        mainContent.value.scrollTop = 0;
+                    }
+                    refreshIcons();
+                });
+
+                onMounted(() => {
+                    refreshIcons();
+                });
+
+                onUpdated(() => {
+                    refreshIcons();
+                });
+
+                return {
+                    currentTab,
+                    tabs,
+                    currentData,
+                    heroImage,
+                    mainContent,
+                    scheduleData,
+                    isModalOpen,
+                    selectedSpot,
+                    googleMapLink,
+                    openModal,
+                    closeModal,
+                    handleImageError,
+                    handleHeroError
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+
+</html>
