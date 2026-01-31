@@ -176,9 +176,9 @@
                     <ul class="space-y-3 text-sm text-stone-600">
                         <li v-for="item in preparationItems" :key="item.id" 
                             class="flex items-start gap-2 cursor-pointer hover:bg-stone-50 p-2 rounded-lg transition-colors"
-                            :role="'checkbox'"
+                            role="checkbox"
                             :aria-checked="item.checked"
-                            :tabindex="0"
+                            tabindex="0"
                             @click="toggleChecklistItem(item.id)"
                             @keydown.enter="toggleChecklistItem(item.id)"
                             @keydown.space.prevent="toggleChecklistItem(item.id)">
