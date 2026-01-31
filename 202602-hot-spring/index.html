@@ -174,17 +174,22 @@
                         行前準備
                     </h3>
                     <ul class="space-y-3 text-sm text-stone-600">
-                        <li v-for="item in preparationItems" :key="item.id" 
+                        <li v-for="item in preparationItems" :key="item.id"
                             class="flex items-start gap-2 cursor-pointer hover:bg-stone-50 p-2 rounded-lg transition-colors"
-                            role="checkbox"
-                            :aria-checked="item.checked"
-                            tabindex="0"
-                            @click="toggleChecklistItem(item.id)"
-                            @keydown.enter="toggleChecklistItem(item.id)"
+                            role="checkbox" :aria-checked="item.checked" tabindex="0"
+                            @click="toggleChecklistItem(item.id)" @keydown.enter="toggleChecklistItem(item.id)"
                             @keydown.space.prevent="toggleChecklistItem(item.id)">
                             <div class="shrink-0 mt-0.5">
-                                <i v-if="item.checked" data-lucide="check-circle-2" class="w-4 h-4 text-green-500"></i>
-                                <i v-else data-lucide="circle" class="w-4 h-4 text-stone-300"></i>
+                                <span class="w-4 h-4 flex items-center justify-center"
+                                    :class="item.checked ? 'text-green-500' : 'text-stone-300'">
+                                    <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                        aria-hidden="true">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <path d="m9 12 2 2 4-4" :class="item.checked ? 'opacity-100' : 'opacity-0'">
+                                        </path>
+                                    </svg>
+                                </span>
                             </div>
                             <span :class="{ 'line-through text-stone-400': item.checked }">{{ item.text }}</span>
                         </li>
@@ -311,7 +316,7 @@
     </div>
 
     <script>
-        const { createApp, ref, computed, watch, nextTick, onMounted, onUpdated } = Vue;
+        const { createApp, ref, computed, watch, nextTick, onMounted } = Vue;
 
         createApp({
             setup() {
@@ -320,7 +325,7 @@
                 const mainContent = ref(null);
                 const isModalOpen = ref(false);
                 const selectedSpot = ref({});
-                
+
                 // Preparation items checklist state
                 const preparationItems = ref([
                     { id: 'item-windproof', text: '落山風大，務必攜帶防風薄外套與帽子。', checked: false },
@@ -563,7 +568,7 @@
                 // 3. 清除瀏覽器資料會移除 localStorage
                 // 4. 使用 JSON 格式儲存，確保資料結構化
                 const STORAGE_KEY = '202602-hot-spring-checklist';
-                
+
                 const loadChecklistFromStorage = () => {
                     try {
                         const saved = localStorage.getItem(STORAGE_KEY);
@@ -581,7 +586,7 @@
                         console.error('Failed to load checklist from localStorage:', error);
                     }
                 };
-                
+
                 const saveChecklistToStorage = () => {
                     try {
                         const dataToSave = preparationItems.value.map(item => ({
@@ -593,7 +598,7 @@
                         console.error('Failed to save checklist to localStorage:', error);
                     }
                 };
-                
+
                 const toggleChecklistItem = (itemId) => {
                     const item = preparationItems.value.find(i => i.id === itemId);
                     if (item) {
@@ -612,12 +617,14 @@
                     refreshIcons();
                 });
 
-                onMounted(() => {
-                    loadChecklistFromStorage();
+                watch(isModalOpen, async (isOpen) => {
+                    if (!isOpen) return;
+                    await nextTick();
                     refreshIcons();
                 });
 
-                onUpdated(() => {
+                onMounted(() => {
+                    loadChecklistFromStorage();
                     refreshIcons();
                 });
 
