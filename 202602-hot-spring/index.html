@@ -176,7 +176,12 @@
                     <ul class="space-y-3 text-sm text-stone-600">
                         <li v-for="item in preparationItems" :key="item.id" 
                             class="flex items-start gap-2 cursor-pointer hover:bg-stone-50 p-2 rounded-lg transition-colors"
-                            @click="toggleChecklistItem(item.id)">
+                            :role="'checkbox'"
+                            :aria-checked="item.checked"
+                            :tabindex="0"
+                            @click="toggleChecklistItem(item.id)"
+                            @keydown.enter="toggleChecklistItem(item.id)"
+                            @keydown.space.prevent="toggleChecklistItem(item.id)">
                             <div class="shrink-0 mt-0.5">
                                 <i v-if="item.checked" data-lucide="check-circle-2" class="w-4 h-4 text-green-500"></i>
                                 <i v-else data-lucide="circle" class="w-4 h-4 text-stone-300"></i>
@@ -551,6 +556,12 @@
                 };
 
                 // --- localStorage Management ---
+                // 使用 localStorage 儲存行前準備勾選狀態
+                // 注意事項:
+                // 1. localStorage 有容量限制 (通常 5-10MB)
+                // 2. 僅儲存在同一瀏覽器、同一裝置上
+                // 3. 清除瀏覽器資料會移除 localStorage
+                // 4. 使用 JSON 格式儲存，確保資料結構化
                 const STORAGE_KEY = '202602-hot-spring-checklist';
                 
                 const loadChecklistFromStorage = () => {
@@ -561,7 +572,7 @@
                             // Update checked states based on saved data
                             preparationItems.value.forEach(item => {
                                 const savedItem = savedData.find(s => s.id === item.id);
-                                if (savedItem !== undefined) {
+                                if (savedItem) {
                                     item.checked = savedItem.checked;
                                 }
                             });
