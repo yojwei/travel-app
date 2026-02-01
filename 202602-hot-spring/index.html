@@ -559,7 +559,10 @@
                 // 判斷目前時間應該自動切換到哪一天
                 const getActiveTabByDate = () => {
                     const now = new Date();
-                    const today = now.toISOString().split('T')[0]; // Format: 2026-02-01
+                    // Use local date instead of UTC to avoid timezone issues
+                    const today = now.getFullYear() + '-' + 
+                                  String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                                  String(now.getDate()).padStart(2, '0');
                     
                     // Find the tab that matches today's date
                     for (const tab of tabs) {
@@ -568,14 +571,13 @@
                         }
                     }
                     
-                    // If today is after all trip dates, show the last day
-                    const lastTripDate = new Date('2026-02-03');
+                    // Derive dates from scheduleData to maintain single source of truth
+                    const lastTripDate = new Date(scheduleData.day3.fullDate + 'T23:59:59');
                     if (now > lastTripDate) {
                         return 'day3';
                     }
                     
-                    // If today is before the trip, show the first day
-                    const firstTripDate = new Date('2026-02-01');
+                    const firstTripDate = new Date(scheduleData.day1.fullDate + 'T00:00:00');
                     if (now < firstTripDate) {
                         return 'day1';
                     }
@@ -588,10 +590,15 @@
                     const currentData = scheduleData[currentTab.value];
                     if (!currentData || !currentData.fullDate) return false;
                     
+                    // Validate time format
+                    if (!item.time || !/^\d{1,2}:\d{2}$/.test(item.time)) {
+                        console.warn('Invalid time format for item:', item);
+                        return false;
+                    }
+                    
                     const now = new Date();
-                    const itemDate = new Date(currentData.fullDate);
-                    const [hours, minutes] = item.time.split(':').map(Number);
-                    itemDate.setHours(hours, minutes, 0, 0);
+                    // Use local date construction to avoid timezone issues
+                    const itemDate = new Date(currentData.fullDate + 'T' + item.time + ':00');
                     
                     return now > itemDate;
                 };
