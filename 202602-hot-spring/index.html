@@ -171,7 +171,7 @@
                             <div class="flex-1">
                                 <h3 class="font-medium text-sm text-stone-600 line-through">{{ item.title }}</h3>
                             </div>
-                            <i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i>
+                            <i data-lucide="check-circle" class="w-4 h-4 text-green-500" aria-label="已完成"></i>
                         </div>
                     </div>
                 </div>
@@ -555,6 +555,9 @@
                     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedSpot.value.location)}`;
                 });
 
+                // --- Constants ---
+                const TIME_FORMAT_REGEX = /^\d{1,2}:\d{2}$/;
+
                 // --- Methods ---
                 // 判斷目前時間應該自動切換到哪一天
                 const getActiveTabByDate = () => {
@@ -591,7 +594,7 @@
                     if (!currentData || !currentData.fullDate) return false;
                     
                     // Validate time format
-                    if (!item.time || !/^\d{1,2}:\d{2}$/.test(item.time)) {
+                    if (!item.time || !TIME_FORMAT_REGEX.test(item.time)) {
                         console.warn('Invalid time format for item:', item);
                         return false;
                     }
