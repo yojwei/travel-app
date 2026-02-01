@@ -7,9 +7,9 @@
     <title>墾丁四重溪舒壓三日遊</title>
 
     <!-- Meta Tags for SEO & OG -->
-    <meta name="description" content="2026/2/1 ~ 2026/2/3 墾丁四重溪溫泉舒壓之旅，包含看海美術館、落山風藝術季與雙流森林步道。">
-    <meta property="og:title" content="墾丁四重溪舒壓三日遊 2026/2/1-2/3">
-    <meta property="og:description" content="2/1 看海藝術季 | 2/2 溫泉Chill | 2/3 森林浴">
+    <meta name="description" content="三天兩夜墾丁四重溪溫泉舒壓之旅，包含看海美術館、落山風藝術季與雙流森林步道。">
+    <meta property="og:title" content="墾丁四重溪舒壓三日遊">
+    <meta property="og:description" content="Day 1 看海藝術季 | Day 2 溫泉Chill | Day 3 森林浴">
     <meta property="og:image"
         content="https://images.unsplash.com/photo-1519046904884-53103b34b206?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80">
     <meta property="og:type" content="website">
@@ -112,7 +112,7 @@
                     <div
                         class="inline-flex items-center space-x-1 bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-medium mb-2">
                         <i data-lucide="calendar" class="w-3 h-3"></i>
-                        <span>{{ currentData.date }}</span>
+                        <span>{{ currentData.displayDate || currentData.date }}</span>
                     </div>
                     <h1 class="text-2xl font-bold leading-tight">{{ currentData.title }}</h1>
                     <p class="text-stone-200 text-sm mt-1 opacity-90">{{ currentData.subtitle }}</p>
@@ -126,25 +126,8 @@
                 <div class="absolute left-8 top-64 bottom-24 w-0.5 bg-stone-200 -z-10 hidden"></div>
 
                 <div v-for="(item, index) in currentData.schedule" :key="item.id">
-                    
-                    <!-- Collapsed View for Expired Events -->
-                    <div v-if="isEventExpired(currentTab, item.time)"
-                        class="bg-stone-100 rounded-lg shadow-sm border border-stone-200 overflow-hidden p-4 opacity-60">
-                        <div class="flex items-center justify-between">
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-xs font-bold text-stone-500 bg-stone-200 px-2 py-1 rounded">
-                                        {{ item.time }}
-                                    </span>
-                                    <h3 class="font-medium text-stone-600">{{ item.title }}</h3>
-                                </div>
-                            </div>
-                            <i data-lucide="check-circle" class="w-5 h-5 text-stone-400"></i>
-                        </div>
-                    </div>
-
-                    <!-- Full Card View for Current/Future Events -->
-                    <div v-else
+                    <!-- Full Card (for current and future items) -->
+                    <div v-if="!isItemPast(item)"
                         class="bg-white rounded-xl shadow-sm border border-stone-100 overflow-hidden active:scale-[0.98] transition-transform duration-200"
                         @click="openModal(item)">
 
@@ -175,6 +158,20 @@
                                     #{{ tag }}
                                 </span>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Collapsed Card (for past items) -->
+                    <div v-else
+                        class="bg-stone-50 rounded-xl border border-stone-200 p-3 opacity-60">
+                        <div class="flex items-center gap-3">
+                            <div class="text-xs font-bold text-stone-500 px-2 py-1 bg-stone-200 rounded">
+                                {{ item.time }}
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-medium text-sm text-stone-600 line-through">{{ item.title }}</h3>
+                            </div>
+                            <i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i>
                         </div>
                     </div>
                 </div>
@@ -254,7 +251,7 @@
                     :class="currentTab === tab.id ? '-translate-y-1' : ''">
                     <i :data-lucide="tab.icon" class="w-6 h-6"></i>
                 </div>
-                <span class="text-[10px] font-medium tracking-wide">{{ tab.label }}</span>
+                <span class="text-[10px] font-medium tracking-wide">{{ tab.displayLabel }}</span>
                 <span class="w-1 h-1 rounded-full bg-primary mt-1 transition-opacity duration-300"
                     :class="currentTab === tab.id ? 'opacity-100' : 'opacity-0'"></span>
             </button>
@@ -356,16 +353,18 @@
 
                 // --- Static Data ---
                 const tabs = [
-                    { id: 'day1', label: '2/1 Day 1', icon: 'sunset', date: '2026-02-01' },
-                    { id: 'day2', label: '2/2 Day 2', icon: 'coffee', date: '2026-02-02' },
-                    { id: 'day3', label: '2/3 Day 3', icon: 'trees', date: '2026-02-03' },
-                    { id: 'info', label: '資訊', icon: 'info', date: null }
+                    { id: 'day1', label: 'Day 1', displayLabel: '2/1', icon: 'sunset', date: '2026-02-01' },
+                    { id: 'day2', label: 'Day 2', displayLabel: '2/2', icon: 'coffee', date: '2026-02-02' },
+                    { id: 'day3', label: 'Day 3', displayLabel: '2/3', icon: 'trees', date: '2026-02-03' },
+                    { id: 'info', label: '資訊', displayLabel: '資訊', icon: 'info' }
                 ];
 
                 const scheduleData = {
                     day1: {
                         dayNum: 1,
-                        date: '2026/2/1 (六)',
+                        date: '第一天',
+                        fullDate: '2026-02-01',
+                        displayDate: '2/1 (六)',
                         title: '藝術季與海風',
                         subtitle: '看海美術館 · 落山風 · 四重溪',
                         heroImage: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80', // Ocean coast
@@ -447,7 +446,9 @@
                     },
                     day2: {
                         dayNum: 2,
-                        date: '2026/2/2 (日)',
+                        date: '第二天',
+                        fullDate: '2026-02-02',
+                        displayDate: '2/2 (日)',
                         title: '溫泉鄉慢活',
                         subtitle: '自然醒 · 泡湯 · 散步',
                         heroImage: 'https://images.unsplash.com/photo-1544575814-65c3ea11abc5?auto=format&fit=crop&w=1200&q=80', // Spa relax
@@ -488,7 +489,9 @@
                     },
                     day3: {
                         dayNum: 3,
-                        date: '2026/2/3 (一)',
+                        date: '第三天',
+                        fullDate: '2026-02-03',
+                        displayDate: '2/3 (一)',
                         title: '森林深呼吸',
                         subtitle: '雙流步道 · 萬巒豬腳 · 返家',
                         heroImage: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1200&q=80', // Forest nature
@@ -553,6 +556,53 @@
                 });
 
                 // --- Methods ---
+                // 判斷目前時間應該自動切換到哪一天
+                const getActiveTabByDate = () => {
+                    const now = new Date();
+                    // Use local date instead of UTC to avoid timezone issues
+                    const today = now.getFullYear() + '-' + 
+                                  String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                                  String(now.getDate()).padStart(2, '0');
+                    
+                    // Find the tab that matches today's date
+                    for (const tab of tabs) {
+                        if (tab.date === today) {
+                            return tab.id;
+                        }
+                    }
+                    
+                    // Derive dates from scheduleData to maintain single source of truth
+                    const lastTripDate = new Date(scheduleData.day3.fullDate + 'T23:59:59');
+                    if (now > lastTripDate) {
+                        return 'day3';
+                    }
+                    
+                    const firstTripDate = new Date(scheduleData.day1.fullDate + 'T00:00:00');
+                    if (now < firstTripDate) {
+                        return 'day1';
+                    }
+                    
+                    return 'day1'; // Default
+                };
+
+                // 判斷某個行程項目是否已經過期（應該折疊）
+                const isItemPast = (item) => {
+                    const currentData = scheduleData[currentTab.value];
+                    if (!currentData || !currentData.fullDate) return false;
+                    
+                    // Validate time format
+                    if (!item.time || !/^\d{1,2}:\d{2}$/.test(item.time)) {
+                        console.warn('Invalid time format for item:', item);
+                        return false;
+                    }
+                    
+                    const now = new Date();
+                    // Use local date construction to avoid timezone issues
+                    const itemDate = new Date(currentData.fullDate + 'T' + item.time + ':00');
+                    
+                    return now > itemDate;
+                };
+
                 const openModal = (item) => {
                     selectedSpot.value = item;
                     isModalOpen.value = true;
@@ -627,70 +677,6 @@
                     }
                 };
 
-                // --- Auto Tab Switching Based on Date and Time ---
-                const getCurrentTabBasedOnDateTime = () => {
-                    const now = new Date();
-                    const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                    
-                    // Find the appropriate tab based on current date
-                    for (const tab of tabs) {
-                        if (tab.date) {
-                            const tabDate = new Date(tab.date);
-                            if (currentDate.getTime() === tabDate.getTime()) {
-                                return tab.id;
-                            }
-                        }
-                    }
-                    
-                    // If before first day, show day1
-                    const firstDay = new Date('2026-02-01');
-                    if (currentDate < firstDay) {
-                        return 'day1';
-                    }
-                    
-                    // If after last day, show day3
-                    const lastDay = new Date('2026-02-03');
-                    if (currentDate > lastDay) {
-                        return 'day3';
-                    }
-                    
-                    // Default to day1
-                    return 'day1';
-                };
-
-                // Check if an event is expired (past)
-                const isEventExpired = (dayId, eventTime) => {
-                    const now = new Date();
-                    const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                    
-                    // Find the date for this day
-                    const tab = tabs.find(t => t.id === dayId);
-                    if (!tab || !tab.date) return false;
-                    
-                    const eventDate = new Date(tab.date);
-                    
-                    // If event is on a past date, it's expired
-                    if (eventDate < currentDate) {
-                        return true;
-                    }
-                    
-                    // If event is today, check the time
-                    if (eventDate.getTime() === currentDate.getTime()) {
-                        // Extract hour from event time (e.g., "09:30" or "下午")
-                        const timeMatch = eventTime.match(/(\d{1,2}):(\d{2})/);
-                        if (timeMatch) {
-                            const eventHour = parseInt(timeMatch[1]);
-                            const eventMinute = parseInt(timeMatch[2]);
-                            const eventDateTime = new Date(now);
-                            eventDateTime.setHours(eventHour, eventMinute, 0, 0);
-                            
-                            return now > eventDateTime;
-                        }
-                    }
-                    
-                    return false;
-                };
-
                 // --- Watchers & Lifecycle ---
                 watch(currentTab, async () => {
                     await nextTick();
@@ -708,12 +694,11 @@
                 });
 
                 onMounted(() => {
+                    // Set initial tab based on current date
+                    currentTab.value = getActiveTabByDate();
+                    
                     loadChecklistFromStorage();
                     refreshIcons();
-                    
-                    // Auto-switch to appropriate tab based on date/time
-                    const autoTab = getCurrentTabBasedOnDateTime();
-                    currentTab.value = autoTab;
                 });
 
                 return {
@@ -732,7 +717,7 @@
                     handleHeroError,
                     preparationItems,
                     toggleChecklistItem,
-                    isEventExpired
+                    isItemPast
                 };
             }
         }).mount('#app');
