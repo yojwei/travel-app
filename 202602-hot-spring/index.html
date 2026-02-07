@@ -93,6 +93,25 @@
                 background-position: -200% 0;
             }
         }
+
+        /* Collapsed Card Expand Animation */
+        .expand-enter-active,
+        .expand-leave-active {
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .expand-enter-from,
+        .expand-leave-to {
+            max-height: 0;
+            opacity: 0;
+        }
+
+        .expand-enter-to,
+        .expand-leave-from {
+            max-height: 500px;
+            opacity: 1;
+        }
     </style>
 </head>
 
@@ -126,21 +145,65 @@
                 <div class="absolute left-8 top-64 bottom-24 w-0.5 bg-stone-200 -z-10 hidden"></div>
 
                 <div v-for="(item, index) in currentData.schedule" :key="item.id">
-                    
+
                     <!-- Collapsed View for Expired Events -->
                     <div v-if="isEventExpired(currentTab, item.time)"
-                        class="bg-stone-100 rounded-lg shadow-sm border border-stone-200 overflow-hidden p-4 opacity-60">
-                        <div class="flex items-center justify-between">
-                            <div class="flex-1">
+                        class="bg-stone-100 rounded-xl shadow-sm border border-stone-200 overflow-hidden transition-all duration-300"
+                        :class="isExpiredItemExpanded(item.id) ? 'opacity-100' : 'opacity-60 hover:opacity-80'">
+
+                        <!-- Collapsed Header (Always Visible) -->
+                        <div class="p-4 cursor-pointer active:bg-stone-200 transition-colors"
+                            @click="toggleExpiredItem(item.id)">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-bold text-stone-500 bg-stone-200 px-2 py-1 rounded">
+                                            {{ item.time }}
+                                        </span>
+                                        <h3 class="font-medium text-stone-600">{{ item.title }}</h3>
+                                    </div>
+                                </div>
                                 <div class="flex items-center gap-2">
-                                    <span class="text-xs font-bold text-stone-500 bg-stone-200 px-2 py-1 rounded">
-                                        {{ item.time }}
-                                    </span>
-                                    <h3 class="font-medium text-stone-600">{{ item.title }}</h3>
+                                    <i data-lucide="check-circle" class="w-5 h-5 text-stone-400"></i>
+                                    <i data-lucide="chevron-down"
+                                        class="w-5 h-5 text-stone-400 transition-transform duration-300"
+                                        :class="isExpiredItemExpanded(item.id) ? 'rotate-180' : ''"></i>
                                 </div>
                             </div>
-                            <i data-lucide="check-circle" class="w-5 h-5 text-stone-400"></i>
                         </div>
+
+                        <!-- Expanded Content (Toggleable) -->
+                        <transition name="expand">
+                            <div v-if="isExpiredItemExpanded(item.id)">
+                                <!-- Card Image -->
+                                <div class="h-40 w-full bg-stone-200 relative overflow-hidden">
+                                    <img :src="item.image" class="w-full h-full object-cover" :alt="item.title"
+                                        loading="lazy" @error="handleImageError">
+                                </div>
+
+                                <!-- Card Content -->
+                                <div class="p-4 pt-3 bg-white">
+                                    <p class="text-stone-500 text-sm leading-relaxed mb-3">
+                                        {{ item.desc }}
+                                    </p>
+
+                                    <!-- Tags -->
+                                    <div class="flex gap-2 mb-3">
+                                        <span v-if="item.tags" v-for="tag in item.tags"
+                                            class="text-xs bg-stone-100 text-stone-600 px-2 py-1 rounded-full">
+                                            #{{ tag }}
+                                        </span>
+                                    </div>
+
+                                    <!-- View Details Button -->
+                                    <button @click.stop="openModal(item)"
+                                        class="w-full bg-stone-200 hover:bg-stone-300 text-stone-700 font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                        <i data-lucide="info" class="w-4 h-4"></i>
+                                        查看詳細資訊
+                                    </button>
+                                </div>
+                            </div>
+                        </transition>
                     </div>
 
                     <!-- Full Card View for Current/Future Events -->
@@ -345,6 +408,7 @@
                 const mainContent = ref(null);
                 const isModalOpen = ref(false);
                 const selectedSpot = ref({});
+                const expandedExpiredItems = ref(new Set());
 
                 // Preparation items checklist state
                 const preparationItems = ref([
@@ -562,6 +626,22 @@
                     isModalOpen.value = false;
                 };
 
+                const toggleExpiredItem = (itemId) => {
+                    if (expandedExpiredItems.value.has(itemId)) {
+                        expandedExpiredItems.value.delete(itemId);
+                    } else {
+                        expandedExpiredItems.value.add(itemId);
+                    }
+                    // Trigger reactivity
+                    expandedExpiredItems.value = new Set(expandedExpiredItems.value);
+                    // Refresh icons after DOM update
+                    nextTick(() => refreshIcons());
+                };
+
+                const isExpiredItemExpanded = (itemId) => {
+                    return expandedExpiredItems.value.has(itemId);
+                };
+
                 const handleImageError = (e) => {
                     // Fallback image in case Unsplash fails
                     e.target.src = 'https://dummyimage.com/800x600/e7e5e4/78716c.jpg&text=No+Image';
@@ -631,7 +711,7 @@
                 const getCurrentTabBasedOnDateTime = () => {
                     const now = new Date();
                     const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                    
+
                     // Find the appropriate tab based on current date
                     for (const tab of tabs) {
                         if (tab.date) {
@@ -641,19 +721,19 @@
                             }
                         }
                     }
-                    
+
                     // If before first day, show day1
                     const firstDay = new Date('2026-02-01');
                     if (currentDate < firstDay) {
                         return 'day1';
                     }
-                    
+
                     // If after last day, show day3
                     const lastDay = new Date('2026-02-03');
                     if (currentDate > lastDay) {
                         return 'day3';
                     }
-                    
+
                     // Default to day1
                     return 'day1';
                 };
@@ -662,18 +742,18 @@
                 const isEventExpired = (dayId, eventTime) => {
                     const now = new Date();
                     const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                    
+
                     // Find the date for this day
                     const tab = tabs.find(t => t.id === dayId);
                     if (!tab || !tab.date) return false;
-                    
+
                     const eventDate = new Date(tab.date);
-                    
+
                     // If event is on a past date, it's expired
                     if (eventDate < currentDate) {
                         return true;
                     }
-                    
+
                     // If event is today, check the time
                     if (eventDate.getTime() === currentDate.getTime()) {
                         // Extract hour from event time (e.g., "09:30" or "下午")
@@ -683,11 +763,11 @@
                             const eventMinute = parseInt(timeMatch[2]);
                             const eventDateTime = new Date(now);
                             eventDateTime.setHours(eventHour, eventMinute, 0, 0);
-                            
+
                             return now > eventDateTime;
                         }
                     }
-                    
+
                     return false;
                 };
 
@@ -698,6 +778,8 @@
                     if (mainContent.value) {
                         mainContent.value.scrollTop = 0;
                     }
+                    // Clear expanded items when switching tabs
+                    expandedExpiredItems.value.clear();
                     refreshIcons();
                 });
 
@@ -710,7 +792,7 @@
                 onMounted(() => {
                     loadChecklistFromStorage();
                     refreshIcons();
-                    
+
                     // Auto-switch to appropriate tab based on date/time
                     const autoTab = getCurrentTabBasedOnDateTime();
                     currentTab.value = autoTab;
@@ -732,7 +814,10 @@
                     handleHeroError,
                     preparationItems,
                     toggleChecklistItem,
-                    isEventExpired
+                    isEventExpired,
+                    expandedExpiredItems,
+                    toggleExpiredItem,
+                    isExpiredItemExpanded
                 };
             }
         }).mount('#app');
